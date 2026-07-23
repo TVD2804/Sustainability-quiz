@@ -1,4 +1,5 @@
 
+<!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
@@ -822,6 +823,7 @@ const ui = {
 const STORAGE_KEY = 'stockmeier-sustainability-quiz-stockmeier-v4';
 const DEBUG_SCREEN_KEY = 'stockmeier-debug-screen';
 const POWER_AUTOMATE_SUBMIT_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/820e1b8ec3a145d880b8d9be364868d8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sniqu72aomTrPaggFwYYEu6sOIhqagODz7xVk6ZmzG0';
+const POWER_AUTOMATE_LEADERBOARD_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/18/workflows/d600c211d315409591048835a365579c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cnlKHu_ZAscmox62flKE1USvNMPJftk2H14k3-Aj1Y0';
 
 async function sendScoreToPowerAutomate(entry) {
   if (!POWER_AUTOMATE_SUBMIT_URL) return;
@@ -1047,6 +1049,58 @@ function showView(view){
 function initSession(){ const q = questionBank[currentLang]; sessionQuestions = q.map((item,idx)=> ({...item, baseIndex: idx, round:'main'})); answers = q.map(item=> item.type==='multiple'?[]:null); questionStates = q.map(()=> ({checked:false,isCorrect:false,points:0})); repeatQueue=[]; inRepeatRound=false; currentIndex=0; }
 function loadBoard(){ try{ const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(parsed) ? parsed : []; }catch(e){ return []; } }
 function saveBoard(entries){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+
+async function refreshSharePointLeaderboard() {
+  if (!POWER_AUTOMATE_LEADERBOARD_URL) return;
+
+  try {
+    const response = await fetch(POWER_AUTOMATE_LEADERBOARD_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        request: 'leaderboard'
+      })
+    });
+
+    if (!response.ok) {
+      console.error('Leaderboard ophalen mislukt:', response.status, response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+
+    const board = Array.isArray(data) ? data.map(item => ({
+      name: item.name || '',
+      department: item.department || '',
+      location: item.location || '',
+      score: Number(item.score) || 0,
+      maxScore: Number(item.maxScore) || getTotalPossibleMax(),
+      percentage: Number(item.percentage) || 0,
+      createdAt: item.createdAt || new Date().toISOString()
+    })) : [];
+
+    board.sort((a, b) =>
+      (b.score || 0) - (a.score || 0) ||
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    saveBoard(board.slice(0, 1000));
+    renderBoard();
+
+    if (currentView === 'leaderboard') {
+      renderLeaderboard();
+    }
+
+    console.log('Leaderboard succesvol bijgewerkt vanuit SharePoint:', board);
+
+  } catch (error) {
+    console.error('Fout bij ophalen leaderboard vanuit SharePoint:', error);
+  }
+}
+
 function formatDate(iso){ try{ return new Intl.DateTimeFormat(currentLang==='nl'?'nl-NL':currentLang==='fr'?'fr-FR':currentLang==='de'?'de-DE':'en-GB',{dateStyle:'short',timeStyle:'short'}).format(new Date(iso)); }catch(e){ return iso; } }
 function downloadTextFile(filename, text, mime){ const blob = new Blob([text], {type: mime || 'text/plain;charset=utf-8;'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); setTimeout(()=> URL.revokeObjectURL(link.href), 500); }
 function updateParticipantInfo(){ els.participantInfo.innerHTML = '<strong>' + escapeHtml(playerName || t('guest')) + '</strong><br>' + escapeHtml(x(t('branchDept'), {branch: playerLocation || '-', department: playerDepartment || '-'})); }
@@ -1098,7 +1152,7 @@ function goHome(){
   currentIndex = 0;
   showView('start');
 }
-function openLeaderboard(){ previousViewBeforeLeaderboard=currentView; showView('leaderboard'); }
+async function openLeaderboard(){ previousViewBeforeLeaderboard=currentView; showView('leaderboard'); await refreshSharePointLeaderboard(); }
 function closeLeaderboard(){ showView(previousViewBeforeLeaderboard || 'start'); }
 function exportCsv(){ const raw=loadBoard(); const csv=[['name','location','department','score','maxPoints','createdAt']].concat(raw.map(item=> [item.name||'', item.location||'', item.department||'', item.score||0, getTotalPossibleMax(), item.createdAt||''])).map(row=> row.map(cell=> '"'+String(cell).replace(/"/g,'""')+'"').join(',')).join('\n'); downloadTextFile('stockmeier_quiz_results.csv', csv, 'text/csv;charset=utf-8;'); }
 function exportJson(){ downloadTextFile('stockmeier_quiz_results.json', JSON.stringify(loadBoard(), null, 2), 'application/json;charset=utf-8;'); }
@@ -1148,6 +1202,7 @@ if(savedDebugState){
 } else {
   showView('start');
 }
+refreshSharePointLeaderboard();
 </script>
 </body>
 </html>
