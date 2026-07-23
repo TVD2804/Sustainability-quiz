@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
@@ -821,6 +821,52 @@ const ui = {
 
 const STORAGE_KEY = 'stockmeier-sustainability-quiz-stockmeier-v4';
 const DEBUG_SCREEN_KEY = 'stockmeier-debug-screen';
+const POWER_AUTOMATE_SUBMIT_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/820e1b8ec3a145d880b8d9be364868d8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sniqu72aomTrPaggFwYYEu6sOIhqagODz7xVk6ZmzG0';
+
+async function sendScoreToPowerAutomate(entry) {
+  if (!POWER_AUTOMATE_SUBMIT_URL) return;
+
+  const payload = {
+    name: entry.name || '',
+    department: entry.department || '',
+    location: entry.location || '',
+    country: entry.country || '',
+    score: Number(entry.score) || 0,
+    maxScore: Number(entry.maxScore) || getTotalPossibleMax(),
+    percentage: Number(entry.percentage) || 0,
+    language: entry.language || currentLang,
+    createdAt: entry.createdAt || new Date().toISOString()
+  };
+
+  try {
+    const response = await fetch(POWER_AUTOMATE_SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      console.error('Power Automate heeft de score niet geaccepteerd:', response.status, response.statusText);
+    } else {
+      console.log('Score succesvol verzonden naar Power Automate.');
+    }
+  } catch (error) {
+    console.warn('Normale JSON-verzending is mislukt. Er wordt een no-cors fallback geprobeerd.', error);
+
+    try {
+      await fetch(POWER_AUTOMATE_SUBMIT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(payload)
+      });
+      console.log('Score verzonden via no-cors fallback. Controleer de Power Automate run history.');
+    } catch (fallbackError) {
+      console.error('Score kon niet naar Power Automate worden verzonden:', fallbackError);
+    }
+  }
+}
+
 let currentLang = 'en';
 let currentView = 'start';
 let currentLeaderboardTab = 'people';
@@ -1043,7 +1089,7 @@ function startRepeatRound(){ const original=questionBank[currentLang]; repeatQue
 function goForward(){ if(currentIndex<sessionQuestions.length-1){ currentIndex += 1; renderQuestion(); return; } if(!inRepeatRound && repeatQueue.length){ startRepeatRound(); return; } finishQuiz(); }
 function buildReview(){ let html=''; sessionQuestions.forEach((item,idx)=> { const state=questionStates[idx]; const userAnswer=item.type==='multiple' ? answers[idx] : [answers[idx]]; const selectedTexts=[], correctTexts=[]; let badgeClass='status-incorrect', badgeText=t('statusIncorrect'); if(state.isCorrect && item.round==='main'){ badgeClass='status-correct'; badgeText=t('statusCorrect'); } if(state.isCorrect && item.round==='repeat'){ badgeClass='status-repeat-correct'; badgeText=t('statusRepeatCorrect'); } userAnswer.forEach(ans=> { if(typeof ans==='number' && typeof item.options[ans] !== 'undefined') selectedTexts.push(escapeHtml(item.options[ans])); }); item.correct.forEach(ans=> correctTexts.push(escapeHtml(item.options[ans]))); html += '<div class="review-card"><span class="status-badge '+badgeClass+'">'+escapeHtml(badgeText)+' · '+state.points+'</span><h3>'+(idx+1)+'. '+escapeHtml(item.question)+(item.round==='repeat' ? ' ('+escapeHtml(t('repeatTag'))+')' : '')+'</h3><div class="review-text"><strong>'+escapeHtml(t('yourAnswer'))+'</strong> '+(selectedTexts.length ? selectedTexts.join(', ') : escapeHtml(t('noAnswerSelected')))+'</div><div class="review-text"><strong>'+escapeHtml(item.correct.length>1 ? t('correctAnswers') : t('correctAnswer'))+'</strong> '+correctTexts.join(', ')+'</div><div class="review-text">'+escapeHtml(item.explanation)+'</div></div>'; }); els.reviewList.innerHTML=html; }
 function renderResultOnly(){ const score=totalScore(), max=getTotalPossibleMax(), firstTryCorrect=questionStates.slice(0, questionBank[currentLang].length).filter(s=> s.checked && s.isCorrect).length; const achievedPct=Math.round((score/max)*100), notAchievedPct=100-achievedPct; els.finalBadge.textContent = x(t('finalBadge'), {score,max}); els.finalScoreValue.textContent = score; els.finalCorrectValue.textContent = firstTryCorrect; els.correctBar.style.width = achievedPct + '%'; els.incorrectBar.style.width = notAchievedPct + '%'; els.correctBarLabel.textContent = achievedPct + '%'; els.incorrectBarLabel.textContent = notAchievedPct + '%'; if(score>=250){ els.resultTitle.textContent=x(t('resultExcellentTitle'),{name:playerName}); els.resultText.textContent=t('resultExcellentText'); } else if(score>=150){ els.resultTitle.textContent=x(t('resultGoodTitle'),{name:playerName}); els.resultText.textContent=t('resultGoodText'); } else { els.resultTitle.textContent=x(t('resultThanksTitle'),{name:playerName}); els.resultText.textContent=t('resultThanksText'); } updateParticipantInfo(); buildReview(); }
-function finishQuiz(){ const score=totalScore(); const board=loadBoard(); renderResultOnly(); board.push({name: playerName, location: playerLocation, department: playerDepartment, score, createdAt: new Date().toISOString()}); board.sort((a,b)=> (b.score||0)-(a.score||0) || new Date(b.createdAt)-new Date(a.createdAt)); saveBoard(board.slice(0,1000)); renderBoard(); showView('result'); }
+function finishQuiz(){ const score=totalScore(); const maxScore=getTotalPossibleMax(); const percentage=Math.round((score/maxScore)*100); const createdAt=new Date().toISOString(); const resultEntry={name: playerName, country: playerCountry, location: playerLocation, department: playerDepartment, score, maxScore, percentage, language: currentLang, createdAt}; const board=loadBoard(); renderResultOnly(); board.push(resultEntry); board.sort((a,b)=> (b.score||0)-(a.score||0) || new Date(b.createdAt)-new Date(a.createdAt)); saveBoard(board.slice(0,1000)); renderBoard(); sendScoreToPowerAutomate(resultEntry); showView('result'); }
 function resetApp(){ showView('start'); els.playerNameInput.value=playerName; els.playerCountryInput.value=playerCountry; populateLocationDropdown(playerCountry, playerLocation); els.playerLocationInput.value=playerLocation; els.playerDepartmentInput.value=playerDepartment; initSession(); updateParticipantInfo(); updateSidebar(); }
 function getLeaderboardData(){ const raw=loadBoard(); const peopleMap={}, deptMap={}, locMap={}; raw.forEach(item=> { const personKey=((item.name||t('guest')).trim().toLowerCase())+'|'+((item.department||'').trim().toLowerCase())+'|'+((item.location||'').trim().toLowerCase()); if(!peopleMap[personKey]) peopleMap[personKey]={name:item.name||t('guest'), department:item.department||'-', location:item.location||'-', bestScore:item.score||0, attempts:0, lastPlayed:item.createdAt||''}; const p=peopleMap[personKey]; p.attempts += 1; p.bestScore=Math.max(p.bestScore,item.score||0); if(!p.lastPlayed || new Date(item.createdAt)>new Date(p.lastPlayed)) p.lastPlayed=item.createdAt; const depKey=(item.department||'-').trim().toLowerCase(); if(!deptMap[depKey]) deptMap[depKey]={department:item.department||'-', participantsSet:{}, attempts:0, totalScore:0, bestScore:0}; const d=deptMap[depKey]; d.attempts += 1; d.totalScore += (item.score||0); d.bestScore=Math.max(d.bestScore,item.score||0); d.participantsSet[(item.name||t('guest')).trim().toLowerCase()]=true; const locKey=(item.location||'-').trim().toLowerCase(); if(!locMap[locKey]) locMap[locKey]={location:item.location||'-', participantsSet:{}, attempts:0, totalScore:0, bestScore:0}; const l=locMap[locKey]; l.attempts += 1; l.totalScore += (item.score||0); l.bestScore=Math.max(l.bestScore,item.score||0); l.participantsSet[(item.name||t('guest')).trim().toLowerCase()]=true; }); const people=Object.values(peopleMap).sort((a,b)=> b.bestScore-a.bestScore || new Date(b.lastPlayed)-new Date(a.lastPlayed)); const departments=Object.values(deptMap).map(x=> ({department:x.department, participants:Object.keys(x.participantsSet).length, attempts:x.attempts, avgScore: x.attempts ? Math.round((x.totalScore/x.attempts)*10)/10 : 0, bestScore:x.bestScore})).sort((a,b)=> b.avgScore-a.avgScore || b.bestScore-a.bestScore); const locations=Object.values(locMap).map(x=> ({location:x.location, participants:Object.keys(x.participantsSet).length, attempts:x.attempts, avgScore: x.attempts ? Math.round((x.totalScore/x.attempts)*10)/10 : 0, bestScore:x.bestScore})).sort((a,b)=> b.avgScore-a.avgScore || b.bestScore-a.bestScore); return {raw, people, departments, locations}; }
 function renderLeaderboard(){ const data=getLeaderboardData(); if(!data.raw.length){ els.leaderboardTableWrap.innerHTML='<div class="helper-text">'+escapeHtml(t('noLeaderboardResults'))+'</div>'; return; } let html=''; if(currentLeaderboardTab==='people'){ html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableName'))+'</th><th>'+escapeHtml(t('tableDepartment'))+'</th><th>'+escapeHtml(t('tableLocation'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableLastPlayed'))+'</th></tr></thead><tbody>'; data.people.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.name)+'</td><td>'+escapeHtml(item.department)+'</td><td>'+escapeHtml(item.location)+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td><td>'+item.attempts+'</td><td>'+escapeHtml(formatDate(item.lastPlayed))+'</td></tr>'; }); html += '</tbody></table>'; } else if(currentLeaderboardTab==='departments'){ html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableDepartment'))+'</th><th>'+escapeHtml(t('tableParticipants'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableAverage'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th></tr></thead><tbody>'; data.departments.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.department)+'</td><td>'+item.participants+'</td><td>'+item.attempts+'</td><td>'+item.avgScore+'/'+getTotalPossibleMax()+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td></tr>'; }); html += '</tbody></table>'; } else { html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableLocation'))+'</th><th>'+escapeHtml(t('tableParticipants'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableAverage'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th></tr></thead><tbody>'; data.locations.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.location)+'</td><td>'+item.participants+'</td><td>'+item.attempts+'</td><td>'+item.avgScore+'/'+getTotalPossibleMax()+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td></tr>'; }); html += '</tbody></table>'; } els.leaderboardTableWrap.innerHTML=html; document.querySelectorAll('.tab-btn').forEach(btn=> btn.classList.remove('active')); document.getElementById(currentLeaderboardTab==='people' ? 'tabPeople' : currentLeaderboardTab==='departments' ? 'tabDepartments' : 'tabLocations').classList.add('active'); }
