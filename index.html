@@ -1093,10 +1093,7 @@ async function refreshSharePointLeaderboard() {
       createdAt: item.createdAt || new Date().toISOString()
     })) : [];
 
-    board.sort((a, b) =>
-      (b.score || 0) - (a.score || 0) ||
-      new Date(a.createdAt) - new Date(b.createdAt)
-    );
+    board.sort(compareLeaderboardEntries);
 
     saveBoard(board.slice(0, 1000));
     renderBoard();
@@ -1113,6 +1110,41 @@ async function refreshSharePointLeaderboard() {
 }
 
 function formatDate(iso){ try{ return new Intl.DateTimeFormat(currentLang==='nl'?'nl-NL':currentLang==='fr'?'fr-FR':currentLang==='de'?'de-DE':'en-GB',{dateStyle:'short',timeStyle:'short'}).format(new Date(iso)); }catch(e){ return iso; } }
+// Leaderboard sortering:
+// 1. hoogste score bovenaan
+// 2. bij gelijke score komt degene die de quiz het vroegst heeft afgerond bovenaan
+function getCompletionTimestamp(value){
+  if(!value) return Number.MAX_SAFE_INTEGER;
+
+  // ISO-datum/tijd vanuit de quiz of SharePoint/Power Automate.
+  const direct = Date.parse(value);
+  if(!Number.isNaN(direct)) return direct;
+
+  // Fallback voor notaties zoals 27-07-2026 14:35 of 27/07/2026, 14:35.
+  const match = String(value).trim().match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})(?:[ T,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(match){
+    const day = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const year = Number(match[3]);
+    const hour = Number(match[4] || 0);
+    const minute = Number(match[5] || 0);
+    const second = Number(match[6] || 0);
+    const localDate = new Date(year, month, day, hour, minute, second);
+    const parsed = localDate.getTime();
+    if(!Number.isNaN(parsed)) return parsed;
+  }
+
+  // Onbekende of lege datum/tijd komt onderaan bij gelijke score.
+  return Number.MAX_SAFE_INTEGER;
+}
+function compareLeaderboardEntries(a,b){
+  const scoreDifference = (Number(b.score) || 0) - (Number(a.score) || 0);
+  if(scoreDifference !== 0) return scoreDifference;
+  return getCompletionTimestamp(a.createdAt) - getCompletionTimestamp(b.createdAt);
+}
+function isEarlierCompletion(a,b){
+  return getCompletionTimestamp(a) < getCompletionTimestamp(b);
+}
 function downloadTextFile(filename, text, mime){ const blob = new Blob([text], {type: mime || 'text/plain;charset=utf-8;'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); setTimeout(()=> URL.revokeObjectURL(link.href), 500); }
 function updateParticipantInfo(){ els.participantInfo.innerHTML = '<strong>' + escapeHtml(playerName || t('guest')) + '</strong><br>' + escapeHtml(x(t('branchDept'), {branch: playerLocation || '-', department: playerDepartment || '-'})); }
 function validateParticipantFields(){ playerName=els.playerNameInput.value.trim(); playerCountry=els.playerCountryInput.value.trim(); playerLocation=els.playerLocationInput.value.trim(); playerDepartment=els.playerDepartmentInput.value.trim(); if(!playerName || !playerCountry || !playerLocation || !playerDepartment){ alert(t('missingFields')); return false; } updateParticipantInfo(); return true; }
@@ -1132,7 +1164,7 @@ function applyLanguage(){
   document.querySelectorAll('.lang-btn').forEach(btn=> btn.classList.toggle('active', btn.dataset.lang===currentLang));
   updateParticipantInfo(); renderBoard(); updateSidebar(); if(!screens.quiz.classList.contains('hidden')) renderQuestion(); if(!screens.result.classList.contains('hidden')) renderResultOnly(); if(!screens.leaderboard.classList.contains('hidden')) renderLeaderboard();
 }
-function renderBoard(){ const board=loadBoard().sort((a,b)=> (b.score||0)-(a.score||0) || new Date(a.createdAt)-new Date(b.createdAt)); if(!board.length){ els.scoreboardList.innerHTML='<div class="helper-text">'+escapeHtml(t('noSavedResults'))+'</div>'; return; } let html=''; board.slice(0,5).forEach((item,idx)=> { html += '<div class="rank-item"><div class="rank-left"><div class="rank-name">'+escapeHtml(x(t('rankName'),{rank: idx+1, name: item.name || t('guest')}))+'</div><div class="rank-meta">'+escapeHtml(x(t('branchDept'),{branch:item.location || '-', department:item.department || '-'}))+' · '+escapeHtml(formatDate(item.createdAt))+'</div></div><div class="rank-score">'+(item.score || 0)+'/'+getTotalPossibleMax()+'</div></div>'; }); els.scoreboardList.innerHTML=html; }
+function renderBoard(){ const board=loadBoard().sort(compareLeaderboardEntries); if(!board.length){ els.scoreboardList.innerHTML='<div class="helper-text">'+escapeHtml(t('noSavedResults'))+'</div>'; return; } let html=''; board.slice(0,5).forEach((item,idx)=> { html += '<div class="rank-item"><div class="rank-left"><div class="rank-name">'+escapeHtml(x(t('rankName'),{rank: idx+1, name: item.name || t('guest')}))+'</div><div class="rank-meta">'+escapeHtml(x(t('branchDept'),{branch:item.location || '-', department:item.department || '-'}))+' · '+escapeHtml(formatDate(item.createdAt))+'</div></div><div class="rank-score">'+(item.score || 0)+'/'+getTotalPossibleMax()+'</div></div>'; }); els.scoreboardList.innerHTML=html; }
 function updateSidebar(){ const total=sessionQuestions.length || questionBank[currentLang].length; const visibleIndex=screens.quiz.classList.contains('hidden') ? 0 : currentIndex+1; els.sidebarQuestion.textContent = visibleIndex + ' / ' + total; els.sidebarSaved.textContent = countChecked(); els.currentProgressPill.textContent = x(t('savedProgress'), {saved: countChecked(), total}); if(els.roundStats) els.roundStats.textContent = x(t('roundStats'), {score: totalScore(), repeatCount: openRepeatCount()}); }
 function openWelcome(){ if(!validateParticipantFields()) return; showView('welcome'); }
 function startQuiz(){ initSession(); showView('quiz'); renderQuestion(); scrollQuizToTop(); }
@@ -1171,10 +1203,81 @@ function startRepeatRound(){ const original=questionBank[currentLang]; repeatQue
 function goForward(){ if(currentIndex<sessionQuestions.length-1){ currentIndex += 1; renderQuestion(); scrollQuizToTop(); return; } if(!inRepeatRound && repeatQueue.length){ startRepeatRound(); scrollQuizToTop(); return; } finishQuiz(); }
 function buildReview(){ let html=''; sessionQuestions.forEach((item,idx)=> { const state=questionStates[idx]; const userAnswer=item.type==='multiple' ? answers[idx] : [answers[idx]]; const selectedTexts=[], correctTexts=[]; let badgeClass='status-incorrect', badgeText=t('statusIncorrect'); if(state.isCorrect && item.round==='main'){ badgeClass='status-correct'; badgeText=t('statusCorrect'); } if(state.isCorrect && item.round==='repeat'){ badgeClass='status-repeat-correct'; badgeText=t('statusRepeatCorrect'); } userAnswer.forEach(ans=> { if(typeof ans==='number' && typeof item.options[ans] !== 'undefined') selectedTexts.push(escapeHtml(item.options[ans])); }); item.correct.forEach(ans=> correctTexts.push(escapeHtml(item.options[ans]))); html += '<div class="review-card"><span class="status-badge '+badgeClass+'">'+escapeHtml(badgeText)+' · '+state.points+'</span><h3>'+(idx+1)+'. '+escapeHtml(item.question)+(item.round==='repeat' ? ' ('+escapeHtml(t('repeatTag'))+')' : '')+'</h3><div class="review-text"><strong>'+escapeHtml(t('yourAnswer'))+'</strong> '+(selectedTexts.length ? selectedTexts.join(', ') : escapeHtml(t('noAnswerSelected')))+'</div><div class="review-text"><strong>'+escapeHtml(item.correct.length>1 ? t('correctAnswers') : t('correctAnswer'))+'</strong> '+correctTexts.join(', ')+'</div><div class="review-text">'+escapeHtml(item.explanation)+'</div></div>'; }); els.reviewList.innerHTML=html; }
 function renderResultOnly(){ const score=totalScore(), max=getTotalPossibleMax(), firstTryCorrect=questionStates.slice(0, questionBank[currentLang].length).filter(s=> s.checked && s.isCorrect).length; const achievedPct=Math.round((score/max)*100), notAchievedPct=100-achievedPct; els.finalBadge.textContent = x(t('finalBadge'), {score,max}); els.finalScoreValue.textContent = score; els.finalCorrectValue.textContent = firstTryCorrect; els.correctBar.style.width = achievedPct + '%'; els.incorrectBar.style.width = notAchievedPct + '%'; els.correctBarLabel.textContent = achievedPct + '%'; els.incorrectBarLabel.textContent = notAchievedPct + '%'; if(score>=250){ els.resultTitle.textContent=x(t('resultExcellentTitle'),{name:playerName}); els.resultText.textContent=t('resultExcellentText'); } else if(score>=150){ els.resultTitle.textContent=x(t('resultGoodTitle'),{name:playerName}); els.resultText.textContent=t('resultGoodText'); } else { els.resultTitle.textContent=x(t('resultThanksTitle'),{name:playerName}); els.resultText.textContent=t('resultThanksText'); } updateParticipantInfo(); buildReview(); }
-function finishQuiz(){ const score=totalScore(); const maxScore=getTotalPossibleMax(); const percentage=Math.round((score/maxScore)*100); const createdAt=new Date().toISOString(); const resultEntry={name: playerName, country: playerCountry, location: playerLocation, department: playerDepartment, score, maxScore, percentage, language: currentLang, createdAt}; const board=loadBoard(); renderResultOnly(); board.push(resultEntry); board.sort((a,b)=> (b.score||0)-(a.score||0) || new Date(b.createdAt)-new Date(a.createdAt)); saveBoard(board.slice(0,1000)); renderBoard(); sendScoreToPowerAutomate(resultEntry); showView('result'); }
+function finishQuiz(){ const score=totalScore(); const maxScore=getTotalPossibleMax(); const percentage=Math.round((score/maxScore)*100); const createdAt=new Date().toISOString(); const resultEntry={name: playerName, country: playerCountry, location: playerLocation, department: playerDepartment, score, maxScore, percentage, language: currentLang, createdAt}; const board=loadBoard(); renderResultOnly(); board.push(resultEntry); board.sort(compareLeaderboardEntries); saveBoard(board.slice(0,1000)); renderBoard(); sendScoreToPowerAutomate(resultEntry); showView('result'); }
 function resetApp(){ showView('start'); els.playerNameInput.value=playerName; els.playerCountryInput.value=playerCountry; populateLocationDropdown(playerCountry, playerLocation); els.playerLocationInput.value=playerLocation; els.playerDepartmentInput.value=playerDepartment; initSession(); updateParticipantInfo(); updateSidebar(); }
-function getLeaderboardData(){ const raw=loadBoard(); const peopleMap={}, deptMap={}, locMap={}; raw.forEach(item=> { const personKey=((item.name||t('guest')).trim().toLowerCase())+'|'+((item.department||'').trim().toLowerCase())+'|'+((item.location||'').trim().toLowerCase()); if(!peopleMap[personKey]) peopleMap[personKey]={name:item.name||t('guest'), department:item.department||'-', location:item.location||'-', bestScore:item.score||0, attempts:0, lastPlayed:item.createdAt||''}; const p=peopleMap[personKey]; p.attempts += 1; p.bestScore=Math.max(p.bestScore,item.score||0); if(!p.lastPlayed || new Date(item.createdAt)>new Date(p.lastPlayed)) p.lastPlayed=item.createdAt; const depKey=(item.department||'-').trim().toLowerCase(); if(!deptMap[depKey]) deptMap[depKey]={department:item.department||'-', participantsSet:{}, attempts:0, totalScore:0, bestScore:0}; const d=deptMap[depKey]; d.attempts += 1; d.totalScore += (item.score||0); d.bestScore=Math.max(d.bestScore,item.score||0); d.participantsSet[(item.name||t('guest')).trim().toLowerCase()]=true; const locKey=(item.location||'-').trim().toLowerCase(); if(!locMap[locKey]) locMap[locKey]={location:item.location||'-', participantsSet:{}, attempts:0, totalScore:0, bestScore:0}; const l=locMap[locKey]; l.attempts += 1; l.totalScore += (item.score||0); l.bestScore=Math.max(l.bestScore,item.score||0); l.participantsSet[(item.name||t('guest')).trim().toLowerCase()]=true; }); const people=Object.values(peopleMap).sort((a,b)=> b.bestScore-a.bestScore || new Date(b.lastPlayed)-new Date(a.lastPlayed)); const departments=Object.values(deptMap).map(x=> ({department:x.department, participants:Object.keys(x.participantsSet).length, attempts:x.attempts, avgScore: x.attempts ? Math.round((x.totalScore/x.attempts)*10)/10 : 0, bestScore:x.bestScore})).sort((a,b)=> b.avgScore-a.avgScore || b.bestScore-a.bestScore); const locations=Object.values(locMap).map(x=> ({location:x.location, participants:Object.keys(x.participantsSet).length, attempts:x.attempts, avgScore: x.attempts ? Math.round((x.totalScore/x.attempts)*10)/10 : 0, bestScore:x.bestScore})).sort((a,b)=> b.avgScore-a.avgScore || b.bestScore-a.bestScore); return {raw, people, departments, locations}; }
-function renderLeaderboard(){ const data=getLeaderboardData(); if(!data.raw.length){ els.leaderboardTableWrap.innerHTML='<div class="helper-text">'+escapeHtml(t('noLeaderboardResults'))+'</div>'; return; } let html=''; if(currentLeaderboardTab==='people'){ html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableName'))+'</th><th>'+escapeHtml(t('tableDepartment'))+'</th><th>'+escapeHtml(t('tableLocation'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableLastPlayed'))+'</th></tr></thead><tbody>'; data.people.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.name)+'</td><td>'+escapeHtml(item.department)+'</td><td>'+escapeHtml(item.location)+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td><td>'+item.attempts+'</td><td>'+escapeHtml(formatDate(item.lastPlayed))+'</td></tr>'; }); html += '</tbody></table>'; } else if(currentLeaderboardTab==='departments'){ html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableDepartment'))+'</th><th>'+escapeHtml(t('tableParticipants'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableAverage'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th></tr></thead><tbody>'; data.departments.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.department)+'</td><td>'+item.participants+'</td><td>'+item.attempts+'</td><td>'+item.avgScore+'/'+getTotalPossibleMax()+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td></tr>'; }); html += '</tbody></table>'; } else { html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableLocation'))+'</th><th>'+escapeHtml(t('tableParticipants'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableAverage'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th></tr></thead><tbody>'; data.locations.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.location)+'</td><td>'+item.participants+'</td><td>'+item.attempts+'</td><td>'+item.avgScore+'/'+getTotalPossibleMax()+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td></tr>'; }); html += '</tbody></table>'; } els.leaderboardTableWrap.innerHTML=html; document.querySelectorAll('.tab-btn').forEach(btn=> btn.classList.remove('active')); document.getElementById(currentLeaderboardTab==='people' ? 'tabPeople' : currentLeaderboardTab==='departments' ? 'tabDepartments' : 'tabLocations').classList.add('active'); }
+function getLeaderboardData(){
+  const raw = loadBoard().sort(compareLeaderboardEntries);
+  const peopleMap = {}, deptMap = {}, locMap = {};
+
+  raw.forEach(item => {
+    const personKey = ((item.name || t('guest')).trim().toLowerCase()) + '|' + ((item.department || '').trim().toLowerCase()) + '|' + ((item.location || '').trim().toLowerCase());
+    if(!peopleMap[personKey]){
+      peopleMap[personKey] = {
+        name: item.name || t('guest'),
+        department: item.department || '-',
+        location: item.location || '-',
+        bestScore: Number(item.score) || 0,
+        attempts: 0,
+        bestCompletedAt: item.createdAt || '',
+        lastPlayed: item.createdAt || ''
+      };
+    }
+
+    const p = peopleMap[personKey];
+    const itemScore = Number(item.score) || 0;
+    p.attempts += 1;
+
+    // Bij dezelfde beste score telt de vroegste afronding als betere positie.
+    if(itemScore > p.bestScore || (itemScore === p.bestScore && isEarlierCompletion(item.createdAt, p.bestCompletedAt))){
+      p.bestScore = itemScore;
+      p.bestCompletedAt = item.createdAt || p.bestCompletedAt;
+    }
+
+    if(!p.lastPlayed || getCompletionTimestamp(item.createdAt) > getCompletionTimestamp(p.lastPlayed)){
+      p.lastPlayed = item.createdAt || p.lastPlayed;
+    }
+
+    const depKey = (item.department || '-').trim().toLowerCase();
+    if(!deptMap[depKey]) deptMap[depKey] = {department:item.department||'-', participantsSet:{}, attempts:0, totalScore:0, bestScore:0};
+    const d = deptMap[depKey];
+    d.attempts += 1;
+    d.totalScore += itemScore;
+    d.bestScore = Math.max(d.bestScore, itemScore);
+    d.participantsSet[(item.name || t('guest')).trim().toLowerCase()] = true;
+
+    const locKey = (item.location || '-').trim().toLowerCase();
+    if(!locMap[locKey]) locMap[locKey] = {location:item.location||'-', participantsSet:{}, attempts:0, totalScore:0, bestScore:0};
+    const l = locMap[locKey];
+    l.attempts += 1;
+    l.totalScore += itemScore;
+    l.bestScore = Math.max(l.bestScore, itemScore);
+    l.participantsSet[(item.name || t('guest')).trim().toLowerCase()] = true;
+  });
+
+  const people = Object.values(peopleMap).sort((a,b) =>
+    b.bestScore - a.bestScore ||
+    getCompletionTimestamp(a.bestCompletedAt) - getCompletionTimestamp(b.bestCompletedAt)
+  );
+
+  const departments = Object.values(deptMap).map(x => ({
+    department:x.department,
+    participants:Object.keys(x.participantsSet).length,
+    attempts:x.attempts,
+    avgScore: x.attempts ? Math.round((x.totalScore/x.attempts)*10)/10 : 0,
+    bestScore:x.bestScore
+  })).sort((a,b)=> b.avgScore-a.avgScore || b.bestScore-a.bestScore);
+
+  const locations = Object.values(locMap).map(x => ({
+    location:x.location,
+    participants:Object.keys(x.participantsSet).length,
+    attempts:x.attempts,
+    avgScore: x.attempts ? Math.round((x.totalScore/x.attempts)*10)/10 : 0,
+    bestScore:x.bestScore
+  })).sort((a,b)=> b.avgScore-a.avgScore || b.bestScore-a.bestScore);
+
+  return {raw, people, departments, locations};
+}
+function renderLeaderboard(){ const data=getLeaderboardData(); if(!data.raw.length){ els.leaderboardTableWrap.innerHTML='<div class="helper-text">'+escapeHtml(t('noLeaderboardResults'))+'</div>'; return; } let html=''; if(currentLeaderboardTab==='people'){ html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableName'))+'</th><th>'+escapeHtml(t('tableDepartment'))+'</th><th>'+escapeHtml(t('tableLocation'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableLastPlayed'))+'</th></tr></thead><tbody>'; data.people.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.name)+'</td><td>'+escapeHtml(item.department)+'</td><td>'+escapeHtml(item.location)+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td><td>'+item.attempts+'</td><td>'+escapeHtml(formatDate(item.bestCompletedAt || item.lastPlayed))+'</td></tr>'; }); html += '</tbody></table>'; } else if(currentLeaderboardTab==='departments'){ html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableDepartment'))+'</th><th>'+escapeHtml(t('tableParticipants'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableAverage'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th></tr></thead><tbody>'; data.departments.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.department)+'</td><td>'+item.participants+'</td><td>'+item.attempts+'</td><td>'+item.avgScore+'/'+getTotalPossibleMax()+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td></tr>'; }); html += '</tbody></table>'; } else { html += '<table class="leaderboard-table"><thead><tr><th>'+escapeHtml(t('tableRank'))+'</th><th>'+escapeHtml(t('tableLocation'))+'</th><th>'+escapeHtml(t('tableParticipants'))+'</th><th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableAverage'))+'</th><th>'+escapeHtml(t('tableBestScore'))+'</th></tr></thead><tbody>'; data.locations.forEach((item,idx)=> { html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.location)+'</td><td>'+item.participants+'</td><td>'+item.attempts+'</td><td>'+item.avgScore+'/'+getTotalPossibleMax()+'</td><td>'+item.bestScore+'/'+getTotalPossibleMax()+'</td></tr>'; }); html += '</tbody></table>'; } els.leaderboardTableWrap.innerHTML=html; document.querySelectorAll('.tab-btn').forEach(btn=> btn.classList.remove('active')); document.getElementById(currentLeaderboardTab==='people' ? 'tabPeople' : currentLeaderboardTab==='departments' ? 'tabDepartments' : 'tabLocations').classList.add('active'); }
 function goHome(){
   localStorage.removeItem(DEBUG_SCREEN_KEY);
   currentIndex = 0;
