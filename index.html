@@ -1095,7 +1095,7 @@ async function refreshSharePointLeaderboard() {
 
     board.sort((a, b) =>
       (b.score || 0) - (a.score || 0) ||
-      new Date(b.createdAt) - new Date(a.createdAt)
+      new Date(a.createdAt) - new Date(b.createdAt)
     );
 
     saveBoard(board.slice(0, 1000));
