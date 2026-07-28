@@ -773,10 +773,10 @@ let questionBank = {
 
 async function loadQuestionBank() {
   try {
-    const response = await fetch('questions.xlsx?v=' + new Date().getTime());
+    const response = await fetch('questions - Template.xlsx?v=' + new Date().getTime());
 
     if (!response.ok) {
-      throw new Error('Could not load questions.xlsx. HTTP status: ' + response.status);
+      throw new Error('Could not load questions - Template.xlsx. HTTP status: ' + response.status);
     }
 
     const data = await response.arrayBuffer();
@@ -792,7 +792,7 @@ async function loadQuestionBank() {
     ['EN', 'NL', 'FR', 'DE'].forEach(sheetName => {
       const worksheet = workbook.Sheets[sheetName];
       if (!worksheet) {
-        console.warn('Missing worksheet in questions.xlsx:', sheetName);
+        console.warn('Missing worksheet in questions - Template.xlsx:', sheetName);
         return;
       }
 
@@ -834,10 +834,10 @@ async function loadQuestionBank() {
       throw new Error('No questions loaded for: ' + missingLanguages.join(', '));
     }
 
-    console.log('Question bank loaded successfully from questions.xlsx', questionBank);
+    console.log('Question bank loaded successfully from questions - Template.xlsx', questionBank);
   } catch (error) {
-    console.error('Error loading questions.xlsx', error);
-    alert('The quiz questions could not be loaded from questions.xlsx. Please check that questions.xlsx is in the same folder as index.html and contains sheets EN, NL, FR and DE.');
+    console.error('Error loading questions - Template.xlsx', error);
+    alert('The quiz questions could not be loaded from questions - Template.xlsx. Please check that questions - Template.xlsx is in the same folder as index.html and contains sheets EN, NL, FR and DE.');
   }
 }
 
