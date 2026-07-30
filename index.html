@@ -777,10 +777,10 @@ let questionBank = {
 
 async function loadQuestionBank() {
   try {
-    const response = await fetch('questions - Template.xlsx?v=' + new Date().getTime());
+    const response = await fetch(QUESTION_FILE + '?v=' + new Date().getTime());
 
     if (!response.ok) {
-      throw new Error('Could not load questions - Template.xlsx. HTTP status: ' + response.status);
+      throw new Error('Could not load ' + QUESTION_FILE + '. HTTP status: ' + response.status);
     }
 
     const data = await response.arrayBuffer();
@@ -796,7 +796,7 @@ async function loadQuestionBank() {
     ['EN', 'NL', 'FR', 'DE'].forEach(sheetName => {
       const worksheet = workbook.Sheets[sheetName];
       if (!worksheet) {
-        console.warn('Missing worksheet in questions - Template.xlsx:', sheetName);
+        console.warn('Missing worksheet in ' + QUESTION_FILE + ':', sheetName);
         return;
       }
 
@@ -838,53 +838,59 @@ async function loadQuestionBank() {
       throw new Error('No questions loaded for: ' + missingLanguages.join(', '));
     }
 
-    console.log('Question bank loaded successfully from questions - Template.xlsx', questionBank);
+    console.log('Question bank loaded successfully from ' + QUESTION_FILE, questionBank);
   } catch (error) {
-    console.error('Error loading questions - Template.xlsx', error);
-    alert('The quiz questions could not be loaded from questions - Template.xlsx. Please check that questions - Template.xlsx is in the same folder as index.html and contains sheets EN, NL, FR and DE.');
+    console.error('Error loading ' + QUESTION_FILE, error);
+    alert('The quiz questions could not be loaded from ' + QUESTION_FILE + '. Please check that ' + QUESTION_FILE + ' is in the same folder as index.html and contains sheets EN, NL, FR and DE.');
   }
 }
 
 const ui = {
   nl: {
-    brandTagline:'A journey towards a sustainable future',heroTitle:'STOCKMEIER Duurzaamheidsquiz',heroText:'Kies rechtsboven je taal. Deze quiz maakt duurzaamheid concreet in het dagelijkse werk, met directe feedback, een herhaalronde en een resultatenoverzicht per persoon, afdeling en vestiging.',heroBadge1:'4 talen',heroBadge2:'Direct feedback',heroBadge3:'Leaderboard and export',heroLeaderboardBtn:'Bekijk leaderboard',pillQuestions:'12 reflectievragen',pillMode:'Enkelvoudige & meerkeuzevragen',pillFeedback:'Direct feedback + herhaalronde voor foute antwoorden',startTitle:'Start de quiz',startText:'Vul hieronder je gegevens in. Daarna krijg je eerst een motiverend scherm te zien over waarom duurzaamheid belangrijk is en waarom jouw deelname ertoe doet.',playerNameLabel:'Naam',playerLocationLabel:'Stockmeier vestiging',playerDepartmentLabel:'Afdeling',playerNamePlaceholder:'bijv. Alex',playerLocationPlaceholder:'bijv. Arnhem',playerDepartmentPlaceholder:'bijv. Supply Chain',continueBtn:'Verder',openLeaderboardBtn:'Bekijk leaderboard',welcomePill1:'Samen impact maken',welcomePill2:'Duurzaamheid in actie',welcomeTitle:'Fijn dat je meedoet!',welcomeIntro:'Met deze quiz help je duurzaamheid zichtbaarder te maken in ons dagelijkse werk. Elke keuze, elk idee en elk gesprek kan bijdragen aan een veiligere, slimmere en duurzamere manier van werken.',welcomeReason1:'<strong>Jouw rol telt.</strong> Duurzaamheid is niet alleen beleid, maar iets dat elke collega iedere dag beïnvloedt.',welcomeReason2:'<strong>Jouw kennis maakt verschil.</strong> Door bewust te kiezen, verspilling te verminderen en risico’s te signaleren, vergroot je direct de positieve impact.',welcomeReason3:'<strong>Samen komen we verder.</strong> Door dezelfde ambitie te delen, versterken we elkaar als team, afdeling en vestiging.',welcomeOutro:'Bedankt dat je hier tijd voor maakt. Je inzet laat zien dat duurzaamheid belangrijk is – en juist samen maken we het verschil.',welcomeBackBtn:'Terug',startQuizBtn:'Quiz starten',backBtn:'Vorige',checkBtn:'Controleer antwoord',nextBtn:'Volgende',finishBtn:'Bekijk resultaat',finalResultPill:'Eindresultaat',pointsLabel:'Punten',correctAnswersLabel:'Direct goed beantwoord',graphicScoreboardTitle:'Grafische scoreverdeling',correctLabel:'Gehaald',incorrectLabel:'Niet gehaald',answerReviewTitle:'Antwoordoverzicht',quizFocusTitle:'Win met je afdeling',quizFocusText:'Doe mee met de quiz, verhoog de score van jouw afdeling en maak kans op een gezellige dinerprijs aan het eind van het jaar.',focusItem1:'<strong>Hoogste afdelingsscore:</strong> de afdeling met de hoogste score aan het eind van het jaar wint',focusItem2:'<strong>Uit eten als prijs:</strong> de winnende afdeling mag uit eten met een waarde van €200,-',focusItem3:'<strong>Elke score telt:</strong> speel de quiz, leer iets nieuws en help jouw afdeling omhoog in het leaderboard',liveStatusTitle:'Live status',questionLabel:'Vraag',savedAnswersLabel:'Beoordeeld',topResultsTitle:'Top 5 resultaten',sidebarLeaderboardBtn:'Volledig leaderboard',noSavedResults:'Nog geen opgeslagen resultaten.',guest:'Gast',questionMeta:'{modeLabel} – vraag {current} van {total}',savedProgress:'Beoordeeld: {saved} / {total}',finalBadge:'{score} / {max} punten',rankName:'#{rank} – {name}',yourAnswer:'Jouw antwoord:',correctAnswer:'Juiste antwoord:',correctAnswers:'Juiste antwoorden:',noAnswerSelected:'Geen antwoord geselecteerd',statusCorrect:'Direct goed',statusIncorrect:'Fout',statusRepeatCorrect:'Herhaalvraag goed',resultExcellentTitle:'Top gedaan, {name}!',resultExcellentText:'Je laat een sterk begrip van duurzaamheid in het dagelijkse werk zien.',resultGoodTitle:'Mooi resultaat, {name}!',resultGoodText:'Je hebt de kern goed te pakken. Met een paar extra voorbeelden wordt het nog eenvoudiger om dit dagelijks toe te passen.',resultThanksTitle:'Bedankt voor het meedoen, {name}!',resultThanksText:'De quiz helpt om bewustwording te vergroten. Kleine dagelijkse acties maken al verschil.',mainRound:'Hoofdronde',repeatRound:'Herhaalronde',feedbackCorrectTitle:'Goed gedaan!',feedbackCorrectText:'Dit is het juiste antwoord.',feedbackIncorrectTitle:'Niet correct',feedbackIncorrectText:'Hieronder zie je het juiste antwoord met uitleg.',pointsFirstCorrect:'+25 punten',pointsRepeatCorrect:'+10 punten',pointsWrong:'+0 punten',repeatTag:'Herhaalvraag',branchDept:'{branch} – {department}',missingFields:'Vul je naam, land, Stockmeier vestiging en afdeling in voordat je start.',participantTitle:'Deelnemer',roundStats:'{score} punten tot nu toe – {repeatCount} herhaalvragen',roundMainDesc:'Eerste beantwoording van alle 12 vragen',roundRepeatDesc:'Herhaal de fout beantwoorde vragen voor een extra kans',leaderboardPill1:'Leaderboard',leaderboardPill2:'Alle resultaten',leaderboardTitle:'Leaderboard en resultatenoverzicht',leaderboardText:'Hier zie je alle resultaten terug per persoon, afdeling en vestiging. Gebruik de exportknoppen om de ruwe data te downloaden.',exportCsvBtn:'Exporteer CSV',exportJsonBtn:'Exporteer JSON',leaderboardBackBtn:'Terug',tabPeople:'Per persoon',tabDepartments:'Per afdeling',tabLocations:'Per vestiging',tabCurrentRound:'Huidige ronde',tabYearTotal:'Jaartotaal',tableRound:'Ronde',tableRoundScore:'Rondescore',tableTotalScore:'Totaalscore',tableRoundsPlayed:'Rondes gespeeld',tableRank:'#',tableName:'Naam',tableDepartment:'Afdeling',tableLocation:'Vestiging',tableScore:'Score',tableAttempts:'Pogingen',tableAverage:'Gem. score',tableBestScore:'Beste score',tableParticipants:'Deelnemers',tableLastPlayed:'Laatst gespeeld',tablePoints:'Punten',noLeaderboardResults:'Er zijn nog geen resultaten om te tonen.',resultLeaderboardBtn:'Bekijk leaderboard',resultExportBtn:'Download resultaten',sustainabilityFooterText:'Wil je meer weten over duurzaamheid binnen STOCKMEIER?',sustainabilityFooterLink:'Lees meer op de STOCKMEIER sustainability pagina'
+    brandTagline:'A journey towards a sustainable future',heroTitle:'STOCKMEIER Duurzaamheidsquiz',heroText:'Kies rechtsboven je taal. Deze quiz maakt duurzaamheid concreet in het dagelijkse werk, met directe feedback, een herhaalronde en een resultatenoverzicht per persoon, afdeling en vestiging.',heroBadge1:'4 talen',heroBadge2:'Direct feedback',heroBadge3:'Leaderboard and export',heroLeaderboardBtn:'Bekijk leaderboard',pillQuestions:'12 reflectievragen',pillMode:'Enkelvoudige & meerkeuzevragen',pillFeedback:'Direct feedback + herhaalronde voor foute antwoorden',startTitle:'Start de quiz',startText:'Vul hieronder je gegevens in. Daarna krijg je eerst een motiverend scherm te zien over waarom duurzaamheid belangrijk is en waarom jouw deelname ertoe doet.',playerNameLabel:'Naam',playerLocationLabel:'Stockmeier vestiging',playerDepartmentLabel:'Afdeling',playerNamePlaceholder:'bijv. Alex',playerLocationPlaceholder:'bijv. Arnhem',playerDepartmentPlaceholder:'bijv. Supply Chain',continueBtn:'Verder',openLeaderboardBtn:'Bekijk leaderboard',welcomePill1:'Samen impact maken',welcomePill2:'Duurzaamheid in actie',welcomeTitle:'Fijn dat je meedoet!',welcomeIntro:'Met deze quiz help je duurzaamheid zichtbaarder te maken in ons dagelijkse werk. Elke keuze, elk idee en elk gesprek kan bijdragen aan een veiligere, slimmere en duurzamere manier van werken.',welcomeReason1:'<strong>Jouw rol telt.</strong> Duurzaamheid is niet alleen beleid, maar iets dat elke collega iedere dag be�nvloedt.',welcomeReason2:'<strong>Jouw kennis maakt verschil.</strong> Door bewust te kiezen, verspilling te verminderen en risico�s te signaleren, vergroot je direct de positieve impact.',welcomeReason3:'<strong>Samen komen we verder.</strong> Door dezelfde ambitie te delen, versterken we elkaar als team, afdeling en vestiging.',welcomeOutro:'Bedankt dat je hier tijd voor maakt. Je inzet laat zien dat duurzaamheid belangrijk is � en juist samen maken we het verschil.',welcomeBackBtn:'Terug',startQuizBtn:'Quiz starten',backBtn:'Vorige',checkBtn:'Controleer antwoord',nextBtn:'Volgende',finishBtn:'Bekijk resultaat',finalResultPill:'Eindresultaat',pointsLabel:'Punten',correctAnswersLabel:'Direct goed beantwoord',graphicScoreboardTitle:'Grafische scoreverdeling',correctLabel:'Gehaald',incorrectLabel:'Niet gehaald',answerReviewTitle:'Antwoordoverzicht',quizFocusTitle:'Win met je afdeling',quizFocusText:'Doe mee met de quiz, verhoog de score van jouw afdeling en maak kans op een gezellige dinerprijs aan het eind van het jaar.',focusItem1:'<strong>Hoogste afdelingsscore:</strong> de afdeling met de hoogste score aan het eind van het jaar wint',focusItem2:'<strong>Uit eten als prijs:</strong> de winnende afdeling mag uit eten met een waarde van �200,-',focusItem3:'<strong>Elke score telt:</strong> speel de quiz, leer iets nieuws en help jouw afdeling omhoog in het leaderboard',liveStatusTitle:'Live status',questionLabel:'Vraag',savedAnswersLabel:'Beoordeeld',topResultsTitle:'Top 5 resultaten',sidebarLeaderboardBtn:'Volledig leaderboard',noSavedResults:'Nog geen opgeslagen resultaten.',guest:'Gast',questionMeta:'{modeLabel} � vraag {current} van {total}',savedProgress:'Beoordeeld: {saved} / {total}',finalBadge:'{score} / {max} punten',rankName:'#{rank} � {name}',yourAnswer:'Jouw antwoord:',correctAnswer:'Juiste antwoord:',correctAnswers:'Juiste antwoorden:',noAnswerSelected:'Geen antwoord geselecteerd',statusCorrect:'Direct goed',statusIncorrect:'Fout',statusRepeatCorrect:'Herhaalvraag goed',resultExcellentTitle:'Top gedaan, {name}!',resultExcellentText:'Je laat een sterk begrip van duurzaamheid in het dagelijkse werk zien.',resultGoodTitle:'Mooi resultaat, {name}!',resultGoodText:'Je hebt de kern goed te pakken. Met een paar extra voorbeelden wordt het nog eenvoudiger om dit dagelijks toe te passen.',resultThanksTitle:'Bedankt voor het meedoen, {name}!',resultThanksText:'De quiz helpt om bewustwording te vergroten. Kleine dagelijkse acties maken al verschil.',mainRound:'Hoofdronde',repeatRound:'Herhaalronde',feedbackCorrectTitle:'Goed gedaan!',feedbackCorrectText:'Dit is het juiste antwoord.',feedbackIncorrectTitle:'Niet correct',feedbackIncorrectText:'Hieronder zie je het juiste antwoord met uitleg.',pointsFirstCorrect:'+25 punten',pointsRepeatCorrect:'+10 punten',pointsWrong:'+0 punten',repeatTag:'Herhaalvraag',branchDept:'{branch} � {department}',missingFields:'Vul je naam, land, Stockmeier vestiging en afdeling in voordat je start.',participantTitle:'Deelnemer',roundStats:'{score} punten tot nu toe � {repeatCount} herhaalvragen',roundMainDesc:'Eerste beantwoording van alle 12 vragen',roundRepeatDesc:'Herhaal de fout beantwoorde vragen voor een extra kans',leaderboardPill1:'Leaderboard',leaderboardPill2:'Alle resultaten',leaderboardTitle:'Leaderboard en resultatenoverzicht',leaderboardText:'Hier zie je alle resultaten terug per persoon, afdeling en vestiging. Gebruik de exportknoppen om de ruwe data te downloaden.',exportCsvBtn:'Exporteer CSV',exportJsonBtn:'Exporteer JSON',leaderboardBackBtn:'Terug',tabPeople:'Per persoon',tabDepartments:'Per afdeling',tabLocations:'Per vestiging',tabCurrentRound:'Huidige ronde',tabYearTotal:'Jaartotaal',tableRound:'Ronde',tableRoundScore:'Rondescore',tableTotalScore:'Totaalscore',tableRoundsPlayed:'Rondes gespeeld',tableRank:'#',tableName:'Naam',tableDepartment:'Afdeling',tableLocation:'Vestiging',tableScore:'Score',tableAttempts:'Pogingen',tableAverage:'Gem. score',tableBestScore:'Beste score',tableParticipants:'Deelnemers',tableLastPlayed:'Laatst gespeeld',tablePoints:'Punten',noLeaderboardResults:'Er zijn nog geen resultaten om te tonen.',resultLeaderboardBtn:'Bekijk leaderboard',resultExportBtn:'Download resultaten',sustainabilityFooterText:'Wil je meer weten over duurzaamheid binnen STOCKMEIER?',sustainabilityFooterLink:'Lees meer op de STOCKMEIER sustainability pagina'
   },
-  en: {brandTagline:'A journey towards a sustainable future',heroTitle:'STOCKMEIER Sustainability Quiz',heroText:'Choose your language at the top right. This quiz makes sustainability practical in daily work, with instant feedback, a repeat round and a results overview by person, department and location.',heroBadge1:'4 languages',heroBadge2:'Instant feedback',heroBadge3:'Leaderboard and export',heroLeaderboardBtn:'View leaderboard',pillQuestions:'12 reflection questions',pillMode:'Single & multiple choice',pillFeedback:'Instant feedback + repeat round for incorrect answers',startTitle:'Start the quiz',startText:'Enter your details below. Before the first question you will see a motivational screen about why sustainability matters and why your contribution counts.',playerNameLabel:'Name',playerLocationLabel:'Stockmeier location',playerDepartmentLabel:'Department',playerNamePlaceholder:'e.g. Alex',playerLocationPlaceholder:'e.g. Arnhem',playerDepartmentPlaceholder:'e.g. Supply Chain',continueBtn:'Continue',openLeaderboardBtn:'View leaderboard',welcomePill1:'Creating impact together',welcomePill2:'Sustainability in action',welcomeTitle:'Great to have you here!',welcomeIntro:'By taking this quiz, you help make sustainability more visible in our daily work. Every choice, idea and conversation can contribute to a safer, smarter and more sustainable way of working.',welcomeReason1:'<strong>Your role matters.</strong> Sustainability is not only policy; it is something every colleague influences every day.',welcomeReason2:'<strong>Your knowledge makes a difference.</strong> By choosing consciously, reducing waste and spotting risks, you directly increase positive impact.',welcomeReason3:'<strong>Together we move further.</strong> By sharing the same ambition, we strengthen each other as teams, departments and locations.',welcomeOutro:'Thank you for taking the time. Your participation shows that sustainability matters – and together we truly make the difference.',welcomeBackBtn:'Back',startQuizBtn:'Start quiz',backBtn:'Back',checkBtn:'Check answer',nextBtn:'Next',finishBtn:'View result',finalResultPill:'Final result',pointsLabel:'Points',correctAnswersLabel:'Correct on first try',graphicScoreboardTitle:'Graphic score split',correctLabel:'Achieved',incorrectLabel:'Not achieved',answerReviewTitle:'Answer review',quizFocusTitle:'Win a team dinner',quizFocusText:'Take part in the quiz, boost your department score and compete for a team dinner prize at the end of the year.',focusItem1:'<strong>Highest department score:</strong> the department with the highest score at the end of the year wins',focusItem2:'<strong>Dinner reward:</strong> the winning department can enjoy a dinner worth €200,-',focusItem3:'<strong>Every score counts:</strong> play the quiz, learn something new and help your department climb the leaderboard',liveStatusTitle:'Live status',questionLabel:'Question',savedAnswersLabel:'Reviewed',topResultsTitle:'Top 5 results',sidebarLeaderboardBtn:'Full leaderboard',noSavedResults:'No saved results yet.',guest:'Guest',questionMeta:'{modeLabel} – question {current} of {total}',savedProgress:'Reviewed: {saved} / {total}',finalBadge:'{score} / {max} points',rankName:'#{rank} – {name}',yourAnswer:'Your answer:',correctAnswer:'Correct answer:',correctAnswers:'Correct answers:',noAnswerSelected:'No answer selected',statusCorrect:'Correct first try',statusIncorrect:'Incorrect',statusRepeatCorrect:'Correct in repeat round',resultExcellentTitle:'Excellent, {name}!',resultExcellentText:'You show a strong understanding of sustainability in daily work.',resultGoodTitle:'Good result, {name}!',resultGoodText:'You captured the core ideas well. A few extra examples will make it even easier to apply in daily work.',resultThanksTitle:'Thanks for joining, {name}!',resultThanksText:'The quiz mainly builds awareness. Even small daily actions can make a difference.',mainRound:'Main round',repeatRound:'Repeat round',feedbackCorrectTitle:'Well done!',feedbackCorrectText:'This is the correct answer.',feedbackIncorrectTitle:'Not correct',feedbackIncorrectText:'Below you can see the correct answer and explanation.',pointsFirstCorrect:'+25 points',pointsRepeatCorrect:'+10 points',pointsWrong:'+0 points',repeatTag:'Repeat question',branchDept:'{branch} – {department}',missingFields:'Please enter your name, country, Stockmeier location and department before starting.',participantTitle:'Participant',roundStats:'{score} points so far – {repeatCount} repeat questions',roundMainDesc:'First attempt of all 12 questions',roundRepeatDesc:'Retry the incorrect questions for an extra chance',leaderboardPill1:'Leaderboard',leaderboardPill2:'All results',leaderboardTitle:'Leaderboard and results overview',leaderboardText:'Here you can review all results by person, department and location. Use the export buttons to download the raw data.',exportCsvBtn:'Export CSV',exportJsonBtn:'Export JSON',leaderboardBackBtn:'Back',tabPeople:'By person',tabDepartments:'By department',tabLocations:'By location',tabCurrentRound:'Current round',tabYearTotal:'Year total',tableRound:'Round',tableRoundScore:'Round score',tableTotalScore:'Total score',tableRoundsPlayed:'Rounds played',tableRank:'#',tableName:'Name',tableDepartment:'Department',tableLocation:'Location',tableScore:'Score',tableAttempts:'Attempts',tableAverage:'Avg. score',tableBestScore:'Best score',tableParticipants:'Participants',tableLastPlayed:'Last played',tablePoints:'Points',noLeaderboardResults:'There are no results to show yet.',resultLeaderboardBtn:'View leaderboard',resultExportBtn:'Download results',sustainabilityFooterText:'Would you like to learn more about sustainability at STOCKMEIER?',sustainabilityFooterLink:'Read more on the STOCKMEIER sustainability page'},
-  fr: {brandTagline:'A journey towards a sustainable future',heroTitle:'Quiz durabilité STOCKMEIER',heroText:'Choisissez votre langue en haut – droite. Ce quiz rend la durabilité concr–te dans le travail quotidien, avec un retour imm–diat, une manche de r–p–tition et une vue des r–sultats par personne, d–partement et site.',heroBadge1:'4 langues',heroBadge2:'Retour imm–diat',heroBadge3:'Classement + export',heroLeaderboardBtn:'Voir le classement',pillQuestions:'12 questions de r–flexion',pillMode:'Choix simple et multiple',pillFeedback:'Retour imm–diat + manche de r–p–tition pour les erreurs',startTitle:'Commencer le quiz',startText:'Saisissez vos informations ci-dessous. Avant la premi–re question, vous verrez un –cran motivant expliquant pourquoi la durabilité est importante et pourquoi votre participation compte.',playerNameLabel:'Nom',playerLocationLabel:'Site Stockmeier',playerDepartmentLabel:'D–partement',playerNamePlaceholder:'par ex. Alex',playerLocationPlaceholder:'par ex. Arnhem',playerDepartmentPlaceholder:'par ex. Supply Chain',continueBtn:'Continuer',openLeaderboardBtn:'Voir le classement',welcomePill1:'Cr–er de l–impact ensemble',welcomePill2:'Durabilit– en action',welcomeTitle:'Merci de participer !',welcomeIntro:'Avec ce quiz, vous contribuez – rendre la durabilité plus visible dans notre travail quotidien. Chaque choix, chaque id–e et chaque –change peut contribuer – une mani–re de travailler plus s–re, plus intelligente et plus durable.',welcomeReason1:'<strong>Votre r–le compte.</strong> La durabilité n–est pas seulement une politique–: elle concerne chaque coll–gue au quotidien.',welcomeReason2:'<strong>Vos connaissances font la diff–rence.</strong> En faisant des choix conscients, en r–duisant le gaspillage et en signalant les risques, vous augmentez imm–diatement l–impact positif.',welcomeReason3:'<strong>Ensemble, nous allons plus loin.</strong> En partageant la m–me ambition, nous nous renfor–ons en –quipe, en d–partement et sur chaque site.',welcomeOutro:'Merci de prendre le temps de participer. Votre engagement montre que la durabilité compte – et c–est ensemble que nous faisons r–ellement la diff–rence.',welcomeBackBtn:'Retour',startQuizBtn:'D–marrer le quiz',backBtn:'Retour',checkBtn:'V–rifier la r–ponse',nextBtn:'Suivant',finishBtn:'Voir le r–sultat',finalResultPill:'R–sultat final',pointsLabel:'Points',correctAnswersLabel:'Correct du premier coup',graphicScoreboardTitle:'R–partition graphique du score',correctLabel:'Obtenu',incorrectLabel:'Non obtenu',answerReviewTitle:'R–vision des r–ponses',quizFocusTitle:'Gagnez un d–ner en –quipe',quizFocusText:'Participez au quiz, am–liorez le score de votre d–partement et tentez de gagner un d–ner en –quipe – la fin de l–ann–e.',focusItem1:'<strong>Meilleur score par d–partement :</strong> le d–partement avec le meilleur score – la fin de l–ann–e gagne',focusItem2:'<strong>D–ner – gagner :</strong> le d–partement gagnant peut profiter d–un d–ner d–une valeur de €200,-',focusItem3:'<strong>Chaque score compte :</strong> jouez au quiz, apprenez quelque chose de nouveau et faites monter votre d–partement dans le classement',liveStatusTitle:'Statut en direct',questionLabel:'Question',savedAnswersLabel:'–valu–',topResultsTitle:'Top 5 des r–sultats',sidebarLeaderboardBtn:'Classement complet',noSavedResults:'Aucun r–sultat enregistr– pour le moment.',guest:'Invit–',questionMeta:'{modeLabel} – question {current} sur {total}',savedProgress:'–valu– : {saved} / {total}',finalBadge:'{score} / {max} points',rankName:'#{rank} – {name}',yourAnswer:'Votre r–ponse :',correctAnswer:'Bonne r–ponse :',correctAnswers:'Bonnes r–ponses :',noAnswerSelected:'Aucune r–ponse s–lectionn–e',statusCorrect:'Correct du premier coup',statusIncorrect:'Incorrect',statusRepeatCorrect:'Correct en r–p–tition',resultExcellentTitle:'Excellent, {name} !',resultExcellentText:'Vous montrez une solide compr–hension de la durabilité dans le travail quotidien.',resultGoodTitle:'Bon r–sultat, {name} !',resultGoodText:'Vous avez bien compris les id–es cl–s. Quelques exemples suppl–mentaires rendront l–application quotidienne encore plus facile.',resultThanksTitle:'Merci pour votre participation, {name} !',resultThanksText:'Le quiz vise surtout – renforcer la sensibilisation. M–me de petites actions quotidiennes peuvent faire une diff–rence.',mainRound:'Manche principale',repeatRound:'Manche de r–p–tition',feedbackCorrectTitle:'Bien jou– !',feedbackCorrectText:'C–est la bonne r–ponse.',feedbackIncorrectTitle:'Incorrect',feedbackIncorrectText:'Vous voyez ci-dessous la bonne r–ponse avec l–explication.',pointsFirstCorrect:'+25 points',pointsRepeatCorrect:'+10 points',pointsWrong:'+0 points',repeatTag:'Question r–p–t–e',branchDept:'{branch} – {department}',missingFields:'Veuillez saisir votre nom, votre pays, votre site Stockmeier et votre d–partement avant de commencer.',participantTitle:'Participant',roundStats:'{score} points pour le moment – {repeatCount} questions r–p–t–es',roundMainDesc:'Premi–re r–ponse aux 12 questions',roundRepeatDesc:'Reprenez les questions incorrectes pour une seconde chance',leaderboardPill1:'Classement',leaderboardPill2:'Tous les r–sultats',leaderboardTitle:'Classement et aper–u des r–sultats',leaderboardText:'Vous voyez ici tous les r–sultats par personne, d–partement et site. Utilisez les boutons d–export pour t–l–charger les donn–es brutes.',exportCsvBtn:'Exporter CSV',exportJsonBtn:'Exporter JSON',leaderboardBackBtn:'Retour',tabPeople:'Par personne',tabDepartments:'Par d–partement',tabLocations:'Par site',tabCurrentRound:'Manche actuelle',tabYearTotal:'Total annuel',tableRound:'Manche',tableRoundScore:'Score manche',tableTotalScore:'Score total',tableRoundsPlayed:'Manches jouées',tableRank:'#',tableName:'Nom',tableDepartment:'D–partement',tableLocation:'Site',tableScore:'Score',tableAttempts:'Tentatives',tableAverage:'Score moy.',tableBestScore:'Meilleur score',tableParticipants:'Participants',tableLastPlayed:'Derni–re participation',tablePoints:'Points',noLeaderboardResults:'Aucun r–sultat – afficher pour le moment.',resultLeaderboardBtn:'Voir le classement',resultExportBtn:'T–l–charger les r–sultats',sustainabilityFooterText:'Vous souhaitez en savoir plus sur la durabilité chez STOCKMEIER ?',sustainabilityFooterLink:'En savoir plus sur la page sustainability de STOCKMEIER'},
-  de: {brandTagline:'A journey towards a sustainable future',heroTitle:'STOCKMEIER Nachhaltigkeitsquiz',heroText:'W–hlen Sie oben rechts Ihre Sprache. Dieses Quiz macht Nachhaltigkeit im Arbeitsalltag konkret – mit Sofort-Feedback, Wiederholungsrunde und Ergebnissen nach Person, Abteilung und Standort.',heroBadge1:'4 Sprachen',heroBadge2:'Sofort-Feedback',heroBadge3:'Bestenliste + Export',heroLeaderboardBtn:'Leaderboard –ffnen',pillQuestions:'12 Reflexionsfragen',pillMode:'Einfach- und Mehrfachauswahl',pillFeedback:'Sofort-Feedback + Wiederholungsrunde f–r falsche Antworten',startTitle:'Quiz starten',startText:'Geben Sie unten Ihre Daten ein. Vor der ersten Frage sehen Sie einen motivierenden Bildschirm, warum Nachhaltigkeit wichtig ist und warum Ihr Beitrag z–hlt.',playerNameLabel:'Name',playerLocationLabel:'Stockmeier Standort',playerDepartmentLabel:'Abteilung',playerNamePlaceholder:'z. B. Alex',playerLocationPlaceholder:'z. B. Arnhem',playerDepartmentPlaceholder:'z. B. Supply Chain',continueBtn:'Weiter',openLeaderboardBtn:'Leaderboard –ffnen',welcomePill1:'Gemeinsam Wirkung erzielen',welcomePill2:'Nachhaltigkeit in Aktion',welcomeTitle:'Sch–n, dass Sie mitmachen!',welcomeIntro:'Mit diesem Quiz helfen Sie dabei, Nachhaltigkeit im Arbeitsalltag sichtbarer zu machen. Jede Entscheidung, jede Idee und jedes Gespr–ch kann zu einer sichereren, intelligenteren und nachhaltigeren Arbeitsweise beitragen.',welcomeReason1:'<strong>Ihre Rolle z–hlt.</strong> Nachhaltigkeit ist nicht nur ein Thema f–r Richtlinien, sondern betrifft alle Kolleginnen und Kollegen jeden Tag.',welcomeReason2:'<strong>Ihr Wissen macht den Unterschied.</strong> Durch bewusste Entscheidungen, weniger Verschwendung und das Erkennen von Risiken vergr––ern Sie direkt die positive Wirkung.',welcomeReason3:'<strong>Gemeinsam kommen wir weiter.</strong> Wenn wir dieselbe Ambition teilen, st–rken wir uns als Team, Abteilung und Standort.',welcomeOutro:'Danke, dass Sie sich die Zeit nehmen. Ihr Einsatz zeigt, dass Nachhaltigkeit wichtig ist – und gemeinsam machen wir den Unterschied.',welcomeBackBtn:'Zur–ck',startQuizBtn:'Quiz starten',backBtn:'Zur–ck',checkBtn:'Antwort pr–fen',nextBtn:'Weiter',finishBtn:'Ergebnis ansehen',finalResultPill:'Endergebnis',pointsLabel:'Punkte',correctAnswersLabel:'Direkt richtig beantwortet',graphicScoreboardTitle:'Grafische Punkteverteilung',correctLabel:'Erreicht',incorrectLabel:'Nicht erreicht',answerReviewTitle:'Antwort–bersicht',quizFocusTitle:'Team-Dinner gewinnen',quizFocusText:'Machen Sie beim Quiz mit, verbessern Sie die Punktzahl Ihrer Abteilung und spielen Sie um ein Team-Dinner am Jahresende.',focusItem1:'<strong>H–chste Abteilungspunktzahl:</strong> die Abteilung mit der h–chsten Punktzahl am Jahresende gewinnt',focusItem2:'<strong>Abendessen als Preis:</strong> die Gewinnerabteilung kann ein Abendessen im Wert von €200,- genie–en',focusItem3:'<strong>Jede Punktzahl z–hlt:</strong> spielen Sie das Quiz, lernen Sie etwas Neues und helfen Sie Ihrer Abteilung im Leaderboard nach oben',liveStatusTitle:'Live-Status',questionLabel:'Frage',savedAnswersLabel:'Bewertet',topResultsTitle:'Top-5-Ergebnisse',sidebarLeaderboardBtn:'Volles Leaderboard',noSavedResults:'Noch keine gespeicherten Ergebnisse.',guest:'Gast',questionMeta:'{modeLabel} – Frage {current} von {total}',savedProgress:'Bewertet: {saved} / {total}',finalBadge:'{score} / {max} Punkte',rankName:'#{rank} – {name}',yourAnswer:'Ihre Antwort:',correctAnswer:'Richtige Antwort:',correctAnswers:'Richtige Antworten:',noAnswerSelected:'Keine Antwort ausgew–hlt',statusCorrect:'Direkt richtig',statusIncorrect:'Falsch',statusRepeatCorrect:'In der Wiederholung richtig',resultExcellentTitle:'Ausgezeichnet, {name}!',resultExcellentText:'Sie zeigen ein starkes Verst–ndnis von Nachhaltigkeit im Arbeitsalltag.',resultGoodTitle:'Gutes Ergebnis, {name}!',resultGoodText:'Sie haben die Kerngedanken gut erfasst. Mit ein paar zus–tzlichen Beispielen l–sst sich das Thema noch leichter im Alltag anwenden.',resultThanksTitle:'Danke f–rs Mitmachen, {name}!',resultThanksText:'Das Quiz soll vor allem das Bewusstsein st–rken. Schon kleine t–gliche Handlungen k–nnen einen Unterschied machen.',mainRound:'Hauptrunde',repeatRound:'Wiederholungsrunde',feedbackCorrectTitle:'Gut gemacht!',feedbackCorrectText:'Das ist die richtige Antwort.',feedbackIncorrectTitle:'Nicht korrekt',feedbackIncorrectText:'Unten sehen Sie die richtige Antwort mit Erkl–rung.',pointsFirstCorrect:'+25 Punkte',pointsRepeatCorrect:'+10 Punkte',pointsWrong:'+0 Punkte',repeatTag:'Wiederholungsfrage',branchDept:'{branch} – {department}',missingFields:'Bitte geben Sie vor dem Start Ihren Namen, das Land, den Stockmeier Standort und die Abteilung ein.',participantTitle:'Teilnehmer',roundStats:'{score} Punkte bisher – {repeatCount} Wiederholungsfragen',roundMainDesc:'Erste Beantwortung aller 12 Fragen',roundRepeatDesc:'Bearbeiten Sie die falschen Fragen erneut f–r eine zweite Chance',leaderboardPill1:'Bestenliste',leaderboardPill2:'Alle Ergebnisse',leaderboardTitle:'Leaderboard und Ergebnis–bersicht',leaderboardText:'Hier sehen Sie alle Ergebnisse nach Person, Abteilung und Standort. –ber die Export-Schaltfl–chen k–nnen Sie die Rohdaten herunterladen.',exportCsvBtn:'CSV exportieren',exportJsonBtn:'JSON exportieren',leaderboardBackBtn:'Zur–ck',tabPeople:'Nach Person',tabDepartments:'Nach Abteilung',tabLocations:'Nach Standort',tabCurrentRound:'Aktuelle Runde',tabYearTotal:'Jahresgesamt',tableRound:'Runde',tableRoundScore:'Rundenpunkte',tableTotalScore:'Gesamtpunkte',tableRoundsPlayed:'Gespielte Runden',tableRank:'#',tableName:'Name',tableDepartment:'Abteilung',tableLocation:'Standort',tableScore:'Punkte',tableAttempts:'Versuche',tableAverage:'– Punkte',tableBestScore:'Beste Punktzahl',tableParticipants:'Teilnehmende',tableLastPlayed:'Zuletzt gespielt',tablePoints:'Punkte',noLeaderboardResults:'Es sind noch keine Ergebnisse vorhanden.',resultLeaderboardBtn:'Leaderboard –ffnen',resultExportBtn:'Ergebnisse herunterladen',sustainabilityFooterText:'M–chten Sie mehr –ber Nachhaltigkeit bei STOCKMEIER erfahren?',sustainabilityFooterLink:'Mehr auf der STOCKMEIER Sustainability-Seite erfahren'}
+  en: {brandTagline:'A journey towards a sustainable future',heroTitle:'STOCKMEIER Sustainability Quiz',heroText:'Choose your language at the top right. This quiz makes sustainability practical in daily work, with instant feedback, a repeat round and a results overview by person, department and location.',heroBadge1:'4 languages',heroBadge2:'Instant feedback',heroBadge3:'Leaderboard and export',heroLeaderboardBtn:'View leaderboard',pillQuestions:'12 reflection questions',pillMode:'Single & multiple choice',pillFeedback:'Instant feedback + repeat round for incorrect answers',startTitle:'Start the quiz',startText:'Enter your details below. Before the first question you will see a motivational screen about why sustainability matters and why your contribution counts.',playerNameLabel:'Name',playerLocationLabel:'Stockmeier location',playerDepartmentLabel:'Department',playerNamePlaceholder:'e.g. Alex',playerLocationPlaceholder:'e.g. Arnhem',playerDepartmentPlaceholder:'e.g. Supply Chain',continueBtn:'Continue',openLeaderboardBtn:'View leaderboard',welcomePill1:'Creating impact together',welcomePill2:'Sustainability in action',welcomeTitle:'Great to have you here!',welcomeIntro:'By taking this quiz, you help make sustainability more visible in our daily work. Every choice, idea and conversation can contribute to a safer, smarter and more sustainable way of working.',welcomeReason1:'<strong>Your role matters.</strong> Sustainability is not only policy; it is something every colleague influences every day.',welcomeReason2:'<strong>Your knowledge makes a difference.</strong> By choosing consciously, reducing waste and spotting risks, you directly increase positive impact.',welcomeReason3:'<strong>Together we move further.</strong> By sharing the same ambition, we strengthen each other as teams, departments and locations.',welcomeOutro:'Thank you for taking the time. Your participation shows that sustainability matters � and together we truly make the difference.',welcomeBackBtn:'Back',startQuizBtn:'Start quiz',backBtn:'Back',checkBtn:'Check answer',nextBtn:'Next',finishBtn:'View result',finalResultPill:'Final result',pointsLabel:'Points',correctAnswersLabel:'Correct on first try',graphicScoreboardTitle:'Graphic score split',correctLabel:'Achieved',incorrectLabel:'Not achieved',answerReviewTitle:'Answer review',quizFocusTitle:'Win a team dinner',quizFocusText:'Take part in the quiz, boost your department score and compete for a team dinner prize at the end of the year.',focusItem1:'<strong>Highest department score:</strong> the department with the highest score at the end of the year wins',focusItem2:'<strong>Dinner reward:</strong> the winning department can enjoy a dinner worth �200,-',focusItem3:'<strong>Every score counts:</strong> play the quiz, learn something new and help your department climb the leaderboard',liveStatusTitle:'Live status',questionLabel:'Question',savedAnswersLabel:'Reviewed',topResultsTitle:'Top 5 results',sidebarLeaderboardBtn:'Full leaderboard',noSavedResults:'No saved results yet.',guest:'Guest',questionMeta:'{modeLabel} � question {current} of {total}',savedProgress:'Reviewed: {saved} / {total}',finalBadge:'{score} / {max} points',rankName:'#{rank} � {name}',yourAnswer:'Your answer:',correctAnswer:'Correct answer:',correctAnswers:'Correct answers:',noAnswerSelected:'No answer selected',statusCorrect:'Correct first try',statusIncorrect:'Incorrect',statusRepeatCorrect:'Correct in repeat round',resultExcellentTitle:'Excellent, {name}!',resultExcellentText:'You show a strong understanding of sustainability in daily work.',resultGoodTitle:'Good result, {name}!',resultGoodText:'You captured the core ideas well. A few extra examples will make it even easier to apply in daily work.',resultThanksTitle:'Thanks for joining, {name}!',resultThanksText:'The quiz mainly builds awareness. Even small daily actions can make a difference.',mainRound:'Main round',repeatRound:'Repeat round',feedbackCorrectTitle:'Well done!',feedbackCorrectText:'This is the correct answer.',feedbackIncorrectTitle:'Not correct',feedbackIncorrectText:'Below you can see the correct answer and explanation.',pointsFirstCorrect:'+25 points',pointsRepeatCorrect:'+10 points',pointsWrong:'+0 points',repeatTag:'Repeat question',branchDept:'{branch} � {department}',missingFields:'Please enter your name, country, Stockmeier location and department before starting.',participantTitle:'Participant',roundStats:'{score} points so far � {repeatCount} repeat questions',roundMainDesc:'First attempt of all 12 questions',roundRepeatDesc:'Retry the incorrect questions for an extra chance',leaderboardPill1:'Leaderboard',leaderboardPill2:'All results',leaderboardTitle:'Leaderboard and results overview',leaderboardText:'Here you can review all results by person, department and location. Use the export buttons to download the raw data.',exportCsvBtn:'Export CSV',exportJsonBtn:'Export JSON',leaderboardBackBtn:'Back',tabPeople:'By person',tabDepartments:'By department',tabLocations:'By location',tabCurrentRound:'Current round',tabYearTotal:'Year total',tableRound:'Round',tableRoundScore:'Round score',tableTotalScore:'Total score',tableRoundsPlayed:'Rounds played',tableRank:'#',tableName:'Name',tableDepartment:'Department',tableLocation:'Location',tableScore:'Score',tableAttempts:'Attempts',tableAverage:'Avg. score',tableBestScore:'Best score',tableParticipants:'Participants',tableLastPlayed:'Last played',tablePoints:'Points',noLeaderboardResults:'There are no results to show yet.',resultLeaderboardBtn:'View leaderboard',resultExportBtn:'Download results',sustainabilityFooterText:'Would you like to learn more about sustainability at STOCKMEIER?',sustainabilityFooterLink:'Read more on the STOCKMEIER sustainability page'},
+  fr: {brandTagline:'A journey towards a sustainable future',heroTitle:'Quiz durabilit� STOCKMEIER',heroText:'Choisissez votre langue en haut � droite. Ce quiz rend la durabilit� concr�te dans le travail quotidien, avec un retour imm�diat, une manche de r�p�tition et une vue des r�sultats par personne, d�partement et site.',heroBadge1:'4 langues',heroBadge2:'Retour imm�diat',heroBadge3:'Classement + export',heroLeaderboardBtn:'Voir le classement',pillQuestions:'12 questions de r�flexion',pillMode:'Choix simple et multiple',pillFeedback:'Retour imm�diat + manche de r�p�tition pour les erreurs',startTitle:'Commencer le quiz',startText:'Saisissez vos informations ci-dessous. Avant la premi�re question, vous verrez un �cran motivant expliquant pourquoi la durabilit� est importante et pourquoi votre participation compte.',playerNameLabel:'Nom',playerLocationLabel:'Site Stockmeier',playerDepartmentLabel:'D�partement',playerNamePlaceholder:'par ex. Alex',playerLocationPlaceholder:'par ex. Arnhem',playerDepartmentPlaceholder:'par ex. Supply Chain',continueBtn:'Continuer',openLeaderboardBtn:'Voir le classement',welcomePill1:'Cr�er de l�impact ensemble',welcomePill2:'Durabilit� en action',welcomeTitle:'Merci de participer !',welcomeIntro:'Avec ce quiz, vous contribuez � rendre la durabilit� plus visible dans notre travail quotidien. Chaque choix, chaque id�e et chaque �change peut contribuer � une mani�re de travailler plus s�re, plus intelligente et plus durable.',welcomeReason1:'<strong>Votre r�le compte.</strong> La durabilit� n�est pas seulement une politique�: elle concerne chaque coll�gue au quotidien.',welcomeReason2:'<strong>Vos connaissances font la diff�rence.</strong> En faisant des choix conscients, en r�duisant le gaspillage et en signalant les risques, vous augmentez imm�diatement l�impact positif.',welcomeReason3:'<strong>Ensemble, nous allons plus loin.</strong> En partageant la m�me ambition, nous nous renfor�ons en �quipe, en d�partement et sur chaque site.',welcomeOutro:'Merci de prendre le temps de participer. Votre engagement montre que la durabilit� compte � et c�est ensemble que nous faisons r�ellement la diff�rence.',welcomeBackBtn:'Retour',startQuizBtn:'D�marrer le quiz',backBtn:'Retour',checkBtn:'V�rifier la r�ponse',nextBtn:'Suivant',finishBtn:'Voir le r�sultat',finalResultPill:'R�sultat final',pointsLabel:'Points',correctAnswersLabel:'Correct du premier coup',graphicScoreboardTitle:'R�partition graphique du score',correctLabel:'Obtenu',incorrectLabel:'Non obtenu',answerReviewTitle:'R�vision des r�ponses',quizFocusTitle:'Gagnez un d�ner en �quipe',quizFocusText:'Participez au quiz, am�liorez le score de votre d�partement et tentez de gagner un d�ner en �quipe � la fin de l�ann�e.',focusItem1:'<strong>Meilleur score par d�partement :</strong> le d�partement avec le meilleur score � la fin de l�ann�e gagne',focusItem2:'<strong>D�ner � gagner :</strong> le d�partement gagnant peut profiter d�un d�ner d�une valeur de �200,-',focusItem3:'<strong>Chaque score compte :</strong> jouez au quiz, apprenez quelque chose de nouveau et faites monter votre d�partement dans le classement',liveStatusTitle:'Statut en direct',questionLabel:'Question',savedAnswersLabel:'�valu�',topResultsTitle:'Top 5 des r�sultats',sidebarLeaderboardBtn:'Classement complet',noSavedResults:'Aucun r�sultat enregistr� pour le moment.',guest:'Invit�',questionMeta:'{modeLabel} � question {current} sur {total}',savedProgress:'�valu� : {saved} / {total}',finalBadge:'{score} / {max} points',rankName:'#{rank} � {name}',yourAnswer:'Votre r�ponse :',correctAnswer:'Bonne r�ponse :',correctAnswers:'Bonnes r�ponses :',noAnswerSelected:'Aucune r�ponse s�lectionn�e',statusCorrect:'Correct du premier coup',statusIncorrect:'Incorrect',statusRepeatCorrect:'Correct en r�p�tition',resultExcellentTitle:'Excellent, {name} !',resultExcellentText:'Vous montrez une solide compr�hension de la durabilit� dans le travail quotidien.',resultGoodTitle:'Bon r�sultat, {name} !',resultGoodText:'Vous avez bien compris les id�es cl�s. Quelques exemples suppl�mentaires rendront l�application quotidienne encore plus facile.',resultThanksTitle:'Merci pour votre participation, {name} !',resultThanksText:'Le quiz vise surtout � renforcer la sensibilisation. M�me de petites actions quotidiennes peuvent faire une diff�rence.',mainRound:'Manche principale',repeatRound:'Manche de r�p�tition',feedbackCorrectTitle:'Bien jou� !',feedbackCorrectText:'C�est la bonne r�ponse.',feedbackIncorrectTitle:'Incorrect',feedbackIncorrectText:'Vous voyez ci-dessous la bonne r�ponse avec l�explication.',pointsFirstCorrect:'+25 points',pointsRepeatCorrect:'+10 points',pointsWrong:'+0 points',repeatTag:'Question r�p�t�e',branchDept:'{branch} � {department}',missingFields:'Veuillez saisir votre nom, votre pays, votre site Stockmeier et votre d�partement avant de commencer.',participantTitle:'Participant',roundStats:'{score} points pour le moment � {repeatCount} questions r�p�t�es',roundMainDesc:'Premi�re r�ponse aux 12 questions',roundRepeatDesc:'Reprenez les questions incorrectes pour une seconde chance',leaderboardPill1:'Classement',leaderboardPill2:'Tous les r�sultats',leaderboardTitle:'Classement et aper�u des r�sultats',leaderboardText:'Vous voyez ici tous les r�sultats par personne, d�partement et site. Utilisez les boutons d�export pour t�l�charger les donn�es brutes.',exportCsvBtn:'Exporter CSV',exportJsonBtn:'Exporter JSON',leaderboardBackBtn:'Retour',tabPeople:'Par personne',tabDepartments:'Par d�partement',tabLocations:'Par site',tabCurrentRound:'Manche actuelle',tabYearTotal:'Total annuel',tableRound:'Manche',tableRoundScore:'Score manche',tableTotalScore:'Score total',tableRoundsPlayed:'Manches jouées',tableRank:'#',tableName:'Nom',tableDepartment:'D�partement',tableLocation:'Site',tableScore:'Score',tableAttempts:'Tentatives',tableAverage:'Score moy.',tableBestScore:'Meilleur score',tableParticipants:'Participants',tableLastPlayed:'Derni�re participation',tablePoints:'Points',noLeaderboardResults:'Aucun r�sultat � afficher pour le moment.',resultLeaderboardBtn:'Voir le classement',resultExportBtn:'T�l�charger les r�sultats',sustainabilityFooterText:'Vous souhaitez en savoir plus sur la durabilit� chez STOCKMEIER ?',sustainabilityFooterLink:'En savoir plus sur la page sustainability de STOCKMEIER'},
+  de: {brandTagline:'A journey towards a sustainable future',heroTitle:'STOCKMEIER Nachhaltigkeitsquiz',heroText:'W�hlen Sie oben rechts Ihre Sprache. Dieses Quiz macht Nachhaltigkeit im Arbeitsalltag konkret � mit Sofort-Feedback, Wiederholungsrunde und Ergebnissen nach Person, Abteilung und Standort.',heroBadge1:'4 Sprachen',heroBadge2:'Sofort-Feedback',heroBadge3:'Bestenliste + Export',heroLeaderboardBtn:'Leaderboard �ffnen',pillQuestions:'12 Reflexionsfragen',pillMode:'Einfach- und Mehrfachauswahl',pillFeedback:'Sofort-Feedback + Wiederholungsrunde f�r falsche Antworten',startTitle:'Quiz starten',startText:'Geben Sie unten Ihre Daten ein. Vor der ersten Frage sehen Sie einen motivierenden Bildschirm, warum Nachhaltigkeit wichtig ist und warum Ihr Beitrag z�hlt.',playerNameLabel:'Name',playerLocationLabel:'Stockmeier Standort',playerDepartmentLabel:'Abteilung',playerNamePlaceholder:'z. B. Alex',playerLocationPlaceholder:'z. B. Arnhem',playerDepartmentPlaceholder:'z. B. Supply Chain',continueBtn:'Weiter',openLeaderboardBtn:'Leaderboard �ffnen',welcomePill1:'Gemeinsam Wirkung erzielen',welcomePill2:'Nachhaltigkeit in Aktion',welcomeTitle:'Sch�n, dass Sie mitmachen!',welcomeIntro:'Mit diesem Quiz helfen Sie dabei, Nachhaltigkeit im Arbeitsalltag sichtbarer zu machen. Jede Entscheidung, jede Idee und jedes Gespr�ch kann zu einer sichereren, intelligenteren und nachhaltigeren Arbeitsweise beitragen.',welcomeReason1:'<strong>Ihre Rolle z�hlt.</strong> Nachhaltigkeit ist nicht nur ein Thema f�r Richtlinien, sondern betrifft alle Kolleginnen und Kollegen jeden Tag.',welcomeReason2:'<strong>Ihr Wissen macht den Unterschied.</strong> Durch bewusste Entscheidungen, weniger Verschwendung und das Erkennen von Risiken vergr��ern Sie direkt die positive Wirkung.',welcomeReason3:'<strong>Gemeinsam kommen wir weiter.</strong> Wenn wir dieselbe Ambition teilen, st�rken wir uns als Team, Abteilung und Standort.',welcomeOutro:'Danke, dass Sie sich die Zeit nehmen. Ihr Einsatz zeigt, dass Nachhaltigkeit wichtig ist � und gemeinsam machen wir den Unterschied.',welcomeBackBtn:'Zur�ck',startQuizBtn:'Quiz starten',backBtn:'Zur�ck',checkBtn:'Antwort pr�fen',nextBtn:'Weiter',finishBtn:'Ergebnis ansehen',finalResultPill:'Endergebnis',pointsLabel:'Punkte',correctAnswersLabel:'Direkt richtig beantwortet',graphicScoreboardTitle:'Grafische Punkteverteilung',correctLabel:'Erreicht',incorrectLabel:'Nicht erreicht',answerReviewTitle:'Antwort�bersicht',quizFocusTitle:'Team-Dinner gewinnen',quizFocusText:'Machen Sie beim Quiz mit, verbessern Sie die Punktzahl Ihrer Abteilung und spielen Sie um ein Team-Dinner am Jahresende.',focusItem1:'<strong>H�chste Abteilungspunktzahl:</strong> die Abteilung mit der h�chsten Punktzahl am Jahresende gewinnt',focusItem2:'<strong>Abendessen als Preis:</strong> die Gewinnerabteilung kann ein Abendessen im Wert von �200,- genie�en',focusItem3:'<strong>Jede Punktzahl z�hlt:</strong> spielen Sie das Quiz, lernen Sie etwas Neues und helfen Sie Ihrer Abteilung im Leaderboard nach oben',liveStatusTitle:'Live-Status',questionLabel:'Frage',savedAnswersLabel:'Bewertet',topResultsTitle:'Top-5-Ergebnisse',sidebarLeaderboardBtn:'Volles Leaderboard',noSavedResults:'Noch keine gespeicherten Ergebnisse.',guest:'Gast',questionMeta:'{modeLabel} � Frage {current} von {total}',savedProgress:'Bewertet: {saved} / {total}',finalBadge:'{score} / {max} Punkte',rankName:'#{rank} � {name}',yourAnswer:'Ihre Antwort:',correctAnswer:'Richtige Antwort:',correctAnswers:'Richtige Antworten:',noAnswerSelected:'Keine Antwort ausgew�hlt',statusCorrect:'Direkt richtig',statusIncorrect:'Falsch',statusRepeatCorrect:'In der Wiederholung richtig',resultExcellentTitle:'Ausgezeichnet, {name}!',resultExcellentText:'Sie zeigen ein starkes Verst�ndnis von Nachhaltigkeit im Arbeitsalltag.',resultGoodTitle:'Gutes Ergebnis, {name}!',resultGoodText:'Sie haben die Kerngedanken gut erfasst. Mit ein paar zus�tzlichen Beispielen l�sst sich das Thema noch leichter im Alltag anwenden.',resultThanksTitle:'Danke f�rs Mitmachen, {name}!',resultThanksText:'Das Quiz soll vor allem das Bewusstsein st�rken. Schon kleine t�gliche Handlungen k�nnen einen Unterschied machen.',mainRound:'Hauptrunde',repeatRound:'Wiederholungsrunde',feedbackCorrectTitle:'Gut gemacht!',feedbackCorrectText:'Das ist die richtige Antwort.',feedbackIncorrectTitle:'Nicht korrekt',feedbackIncorrectText:'Unten sehen Sie die richtige Antwort mit Erkl�rung.',pointsFirstCorrect:'+25 Punkte',pointsRepeatCorrect:'+10 Punkte',pointsWrong:'+0 Punkte',repeatTag:'Wiederholungsfrage',branchDept:'{branch} � {department}',missingFields:'Bitte geben Sie vor dem Start Ihren Namen, das Land, den Stockmeier Standort und die Abteilung ein.',participantTitle:'Teilnehmer',roundStats:'{score} Punkte bisher � {repeatCount} Wiederholungsfragen',roundMainDesc:'Erste Beantwortung aller 12 Fragen',roundRepeatDesc:'Bearbeiten Sie die falschen Fragen erneut f�r eine zweite Chance',leaderboardPill1:'Bestenliste',leaderboardPill2:'Alle Ergebnisse',leaderboardTitle:'Leaderboard und Ergebnis�bersicht',leaderboardText:'Hier sehen Sie alle Ergebnisse nach Person, Abteilung und Standort. �ber die Export-Schaltfl�chen k�nnen Sie die Rohdaten herunterladen.',exportCsvBtn:'CSV exportieren',exportJsonBtn:'JSON exportieren',leaderboardBackBtn:'Zur�ck',tabPeople:'Nach Person',tabDepartments:'Nach Abteilung',tabLocations:'Nach Standort',tabCurrentRound:'Aktuelle Runde',tabYearTotal:'Jahresgesamt',tableRound:'Runde',tableRoundScore:'Rundenpunkte',tableTotalScore:'Gesamtpunkte',tableRoundsPlayed:'Gespielte Runden',tableRank:'#',tableName:'Name',tableDepartment:'Abteilung',tableLocation:'Standort',tableScore:'Punkte',tableAttempts:'Versuche',tableAverage:'� Punkte',tableBestScore:'Beste Punktzahl',tableParticipants:'Teilnehmende',tableLastPlayed:'Zuletzt gespielt',tablePoints:'Punkte',noLeaderboardResults:'Es sind noch keine Ergebnisse vorhanden.',resultLeaderboardBtn:'Leaderboard �ffnen',resultExportBtn:'Ergebnisse herunterladen',sustainabilityFooterText:'M�chten Sie mehr �ber Nachhaltigkeit bei STOCKMEIER erfahren?',sustainabilityFooterLink:'Mehr auf der STOCKMEIER Sustainability-Seite erfahren'}
 };
 
+// =======================================================
+// RONDE-INSTELLINGEN
+// Pas CURRENT_ROUND aan wanneer een nieuwe ronde start.
+// De Excelbestanden moeten exact heten:
+// Questions - Round 1.xlsx t/m Questions - Round 12.xlsx
+// =======================================================
 const TOTAL_ROUNDS = 12;
-const CURRENT_ROUND = 1;
+const CURRENT_ROUND = 2;
 const QUESTION_FILE = `Questions - Round ${CURRENT_ROUND}.xlsx`;
 
-const STORAGE_KEY = 'stockmeier-sustainability-quiz-stockmeier-v4';
+const STORAGE_KEY = 'stockmeier-sustainability-quiz-stockmeier-v5-rounds';
 const DEBUG_SCREEN_KEY = 'stockmeier-debug-screen';
 const POWER_AUTOMATE_SUBMIT_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/820e1b8ec3a145d880b8d9be364868d8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sniqu72aomTrPaggFwYYEu6sOIhqagODz7xVk6ZmzG0';
 const POWER_AUTOMATE_LEADERBOARD_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/18/workflows/d600c211d315409591048835a365579c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cnlKHu_ZAscmox62flKE1USvNMPJftk2H14k3-Aj1Y0';
 
 async function sendScoreToPowerAutomate(entry) {
   if (!POWER_AUTOMATE_SUBMIT_URL) return;
-
   const payload = {
     name: entry.name || '',
     department: entry.department || '',
     location: entry.location || '',
     country: entry.country || '',
-    score: Number(entry.score) || 0,
+    round: Number(entry.round) || CURRENT_ROUND,
+    roundScore: Number(entry.roundScore) || Number(entry.score) || 0,
+    score: Number(entry.score) || Number(entry.roundScore) || 0,
     maxScore: Number(entry.maxScore) || getTotalPossibleMax(),
     percentage: Number(entry.percentage) || 0,
     language: entry.language || currentLang,
-    createdAt: entry.createdAt || new Date().toISOString()
+    createdAt: entry.createdAt || new Date().toISOString(),
+    answerSummary: entry.answerSummary || ''
   };
-
   try {
     const response = await fetch(POWER_AUTOMATE_SUBMIT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
     if (!response.ok) {
       console.error('Power Automate heeft de score niet geaccepteerd:', response.status, response.statusText);
     } else {
@@ -892,7 +898,6 @@ async function sendScoreToPowerAutomate(entry) {
     }
   } catch (error) {
     console.warn('Normale JSON-verzending is mislukt. Er wordt een no-cors fallback geprobeerd.', error);
-
     try {
       await fetch(POWER_AUTOMATE_SUBMIT_URL, {
         method: 'POST',
@@ -906,10 +911,10 @@ async function sendScoreToPowerAutomate(entry) {
     }
   }
 }
-
 let currentLang = 'en';
 let currentView = 'start';
 let currentLeaderboardTab = 'people';
+let currentLeaderboardScope = 'currentRound';
 let previousViewBeforeLeaderboard = 'start';
 let playerName = '', playerCountry = '', playerLocation = '', playerDepartment = '';
 let sessionQuestions = [], currentIndex = 0, answers = [], questionStates = [], repeatQueue = [], inRepeatRound = false;
@@ -933,14 +938,14 @@ const els = {
 const dropdownTexts = {
   nl: { countryLabel:'Land', selectCountry:'Selecteer land', chooseCountryFirst:'Kies eerst een land', selectLocation:'Selecteer vestiging' },
   en: { countryLabel:'Country', selectCountry:'Select country', chooseCountryFirst:'Choose a country first', selectLocation:'Select location' },
-  fr: { countryLabel:'Pays', selectCountry:'S–lectionnez un pays', chooseCountryFirst:'Choisissez d–abord un pays', selectLocation:'S–lectionnez un site' },
-  de: { countryLabel:'Land', selectCountry:'Land ausw–hlen', chooseCountryFirst:'W–hlen Sie zuerst ein Land', selectLocation:'Standort ausw–hlen' }
+  fr: { countryLabel:'Pays', selectCountry:'S�lectionnez un pays', chooseCountryFirst:'Choisissez d�abord un pays', selectLocation:'S�lectionnez un site' },
+  de: { countryLabel:'Land', selectCountry:'Land ausw�hlen', chooseCountryFirst:'W�hlen Sie zuerst ein Land', selectLocation:'Standort ausw�hlen' }
 };
 
 const companyLocations = [
   {company:'BASSERMANN minerals GmbH & Co. KG', city:'Hamburg', country:'Germany'},
   {company:'BASSERMANN minerals GmbH & Co. KG', city:'Mannheim', country:'Germany'},
-  {company:'CERIN GmbH', city:'N–rnberg', country:'Germany'},
+  {company:'CERIN GmbH', city:'N�rnberg', country:'Germany'},
   {company:'CHUPA Spezialchemie GmbH', city:'Wertingen', country:'Germany'},
   {company:'Creamy Creation', city:'Batavia, New York', country:'United States'},
   {company:'Creamy Creation', city:'Little Ferry, New Jersey', country:'United States'},
@@ -958,13 +963,13 @@ const companyLocations = [
   {company:'Intercoat Specialties SL', city:'Molins de Rei', country:'Spain'},
   {company:'KAPP Chemical North America Inc.', city:'Wilmington, Delaware', country:'United States'},
   {company:'KAPP-CHEMIE GmbH & Co. KG', city:'Miehlen', country:'Germany'},
-  {company:'Kemtan AG', city:'Z–rich', country:'Switzerland'},
+  {company:'Kemtan AG', city:'Z�rich', country:'Switzerland'},
   {company:'LUBRO S.A.S.', city:'Sevran', country:'France'},
   {company:'Lobeck Chemie AG', city:'Bad Zurzach', country:'Switzerland'},
-  {company:'New Química S.L.', city:'Casarrubios del Monte', country:'Spain'},
+  {company:'New Qu�mica S.L.', city:'Casarrubios del Monte', country:'Spain'},
   {company:'STAUB & CO. - SILBERMANN GmbH', city:'Gablingen', country:'Germany'},
-  {company:'STAUB & CO. - SILBERMANN GmbH', city:'M–nchen', country:'Germany'},
-  {company:'STAUB & CO. - SILBERMANN GmbH', city:'N–rnberg', country:'Germany'},
+  {company:'STAUB & CO. - SILBERMANN GmbH', city:'M�nchen', country:'Germany'},
+  {company:'STAUB & CO. - SILBERMANN GmbH', city:'N�rnberg', country:'Germany'},
   {company:'STOCKMEIER Chemia Sp. z o.o.', city:'Poznan', country:'Poland'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Balve', country:'Germany'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Berlin', country:'Germany'},
@@ -973,14 +978,14 @@ const companyLocations = [
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Eilenburg', country:'Germany'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Hanau', country:'Germany'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Harsum', country:'Germany'},
-  {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'L–beck', country:'Germany'},
+  {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'L�beck', country:'Germany'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Neuss', country:'Germany'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'Niederzier', country:'Germany'},
   {company:'STOCKMEIER Chemie GmbH & Co. KG', city:'St. Ingbert', country:'Germany'},
   {company:'STOCKMEIER Chemicals Belux SA/NV', city:'Limal', country:'Belgium'},
   {company:'STOCKMEIER Fluids GmbH & Co. KG', city:'Balve', country:'Germany'},
   {company:'STOCKMEIER Food GmbH', city:'Herford', country:'Germany'},
-  {company:'STOCKMEIER Food Kft.', city:'Cs–m–r', country:'Hungary'},
+  {company:'STOCKMEIER Food Kft.', city:'Cs�m�r', country:'Hungary'},
   {company:'STOCKMEIER France S.A.S.', city:'Arnas', country:'France'},
   {company:'STOCKMEIER France S.A.S.', city:'Cestas', country:'France'},
   {company:'STOCKMEIER France S.A.S.', city:'Formerie', country:'France'},
@@ -990,10 +995,10 @@ const companyLocations = [
   {company:'STOCKMEIER France S.A.S.', city:'St Jacques de la Lande', country:'France'},
   {company:'STOCKMEIER Logistik GmbH & Co. KG', city:'Bielefeld', country:'Germany'},
   {company:'STOCKMEIER Netherlands BV', city:'Ridderkerk', country:'Netherlands'},
-  {company:'STOCKMEIER Química S.L.U.', city:'Paterna', country:'Spain'},
-  {company:'STOCKMEIER Química S.L.U.', city:'Sant Joan Desp–', country:'Spain'},
-  {company:'STOCKMEIER Química S.L.U.', city:'Sentmenat', country:'Spain'},
-  {company:'STOCKMEIER Química S.L.U.', city:'Zierbena', country:'Spain'},
+  {company:'STOCKMEIER Qu�mica S.L.U.', city:'Paterna', country:'Spain'},
+  {company:'STOCKMEIER Qu�mica S.L.U.', city:'Sant Joan Desp�', country:'Spain'},
+  {company:'STOCKMEIER Qu�mica S.L.U.', city:'Sentmenat', country:'Spain'},
+  {company:'STOCKMEIER Qu�mica S.L.U.', city:'Zierbena', country:'Spain'},
   {company:'STOCKMEIER Urethanes France S.A.S.', city:'Cernay', country:'France'},
   {company:'STOCKMEIER Urethanes GmbH & Co. KG', city:'Lemgo', country:'Germany'},
   {company:'STOCKMEIER Urethanes ME LLC', city:'Dubai', country:'United Arab Emirates'},
@@ -1088,30 +1093,6 @@ function initSession(){ const q = questionBank[currentLang]; sessionQuestions = 
 function loadBoard(){ try{ const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(parsed) ? parsed : []; }catch(e){ return []; } }
 function saveBoard(entries){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
 
-
-function coalesceValue(item, names, fallback){
-  for(const name of names){
-    if(item && item[name] !== undefined && item[name] !== null && item[name] !== '') return item[name];
-  }
-  return fallback;
-}
-function normalizeLeaderboardItem(item){
-  const roundScore = Number(coalesceValue(item, ['roundScore','RoundScore','roundscore','score','Score'], 0)) || 0;
-  return {
-    name: coalesceValue(item, ['name','Name','Title'], ''),
-    department: coalesceValue(item, ['department','Department'], ''),
-    location: coalesceValue(item, ['location','Location'], ''),
-    country: coalesceValue(item, ['country','Country'], ''),
-    round: Number(coalesceValue(item, ['round','Round'], 1)) || 1,
-    roundScore: roundScore,
-    score: roundScore,
-    maxScore: Number(coalesceValue(item, ['maxScore','MaxScore'], getTotalPossibleMax())) || getTotalPossibleMax(),
-    percentage: Number(coalesceValue(item, ['percentage','Percentage'], 0)) || 0,
-    language: coalesceValue(item, ['language','Language'], currentLang),
-    createdAt: coalesceValue(item, ['createdAt','CreatedAt','created','Created'], new Date().toISOString()),
-    answerSummary: coalesceValue(item, ['answerSummary','AnswerSummary'], '')
-  };
-}
 async function refreshSharePointLeaderboard() {
   if (!POWER_AUTOMATE_LEADERBOARD_URL) return;
   try {
@@ -1126,7 +1107,23 @@ async function refreshSharePointLeaderboard() {
       return;
     }
     const data = await response.json();
-    const board = Array.isArray(data) ? data.map(item => normalizeLeaderboardItem(item)) : [];
+    const board = Array.isArray(data) ? data.map(item => {
+      const roundScore = Number(item.roundScore) || Number(item.score) || 0;
+      return {
+        name: item.name || '',
+        department: item.department || '',
+        location: item.location || '',
+        country: item.country || '',
+        round: Number(item.round) || 1,
+        roundScore: roundScore,
+        score: roundScore,
+        maxScore: Number(item.maxScore) || getTotalPossibleMax(),
+        percentage: Number(item.percentage) || 0,
+        language: item.language || currentLang,
+        createdAt: item.createdAt || new Date().toISOString(),
+        answerSummary: item.answerSummary || ''
+      };
+    }) : [];
     board.sort(compareLeaderboardEntries);
     saveBoard(board.slice(0, 1000));
     renderBoard();
@@ -1136,13 +1133,7 @@ async function refreshSharePointLeaderboard() {
     console.error('Fout bij ophalen leaderboard vanuit SharePoint:', error);
   }
 }
-function formatDate(iso){
-  try{
-    return new Intl.DateTimeFormat(currentLang==='nl'?'nl-NL':currentLang==='fr'?'fr-FR':currentLang==='de'?'de-DE':'en-GB',{dateStyle:'short',timeStyle:'short'}).format(new Date(iso));
-  }catch(e){
-    return iso;
-  }
-}
+function formatDate(iso){ try{ return new Intl.DateTimeFormat(currentLang==='nl'?'nl-NL':currentLang==='fr'?'fr-FR':currentLang==='de'?'de-DE':'en-GB',{dateStyle:'short',timeStyle:'short'}).format(new Date(iso)); }catch(e){ return iso; } }
 function getCompletionTimestamp(value){
   if(!value) return Number.MAX_SAFE_INTEGER;
   const direct = Date.parse(value);
@@ -1165,6 +1156,7 @@ function compareLeaderboardEntries(a,b){
   if(scoreDifference !== 0) return scoreDifference;
   return getCompletionTimestamp(a.createdAt) - getCompletionTimestamp(b.createdAt);
 }
+
 function downloadTextFile(filename, text, mime){ const blob = new Blob([text], {type: mime || 'text/plain;charset=utf-8;'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); setTimeout(()=> URL.revokeObjectURL(link.href), 500); }
 function updateParticipantInfo(){ els.participantInfo.innerHTML = '<strong>' + escapeHtml(playerName || t('guest')) + '</strong><br>' + escapeHtml(x(t('branchDept'), {branch: playerLocation || '-', department: playerDepartment || '-'})); }
 function validateParticipantFields(){ playerName=els.playerNameInput.value.trim(); playerCountry=els.playerCountryInput.value.trim(); playerLocation=els.playerLocationInput.value.trim(); playerDepartment=els.playerDepartmentInput.value.trim(); if(!playerName || !playerCountry || !playerLocation || !playerDepartment){ alert(t('missingFields')); return false; } updateParticipantInfo(); return true; }
@@ -1185,21 +1177,19 @@ function applyLanguage(){
   updateParticipantInfo(); renderBoard(); updateSidebar(); if(!screens.quiz.classList.contains('hidden')) renderQuestion(); if(!screens.result.classList.contains('hidden')) renderResultOnly(); if(!screens.leaderboard.classList.contains('hidden')) renderLeaderboard();
 }
 function renderBoard(){
-  const board = getFirstAttemptPerPersonPerRound(loadBoard().map(item => normalizeLeaderboardItem(item)).filter(item => Number(item.round) === CURRENT_ROUND)).sort(compareLeaderboardEntries);
+  const board = getFirstAttemptPerPersonPerRound(loadBoard().filter(item => Number(item.round) === CURRENT_ROUND)).sort(compareLeaderboardEntries);
   if(!board.length){
     els.scoreboardList.innerHTML='<div class="helper-text">'+escapeHtml(t('noSavedResults'))+'</div>';
     return;
   }
   let html='';
   board.slice(0,5).forEach((item,idx)=> {
-    const row = normalizeLeaderboardItem(item);
-    const score = Number(row.roundScore) || Number(row.score) || 0;
-    html += '<div class="rank-item"><div class="rank-left"><div class="rank-name">'+escapeHtml(x(t('rankName'),{rank: idx+1, name: row.name || t('guest')}))+'</div><div class="rank-meta">'+escapeHtml(x(t('branchDept'),{branch:row.location || '-', department:row.department || '-'}))+' · '+escapeHtml(formatDate(row.createdAt))+'</div></div><div class="rank-score">'+score+'/'+getTotalPossibleMax()+'</div></div>';
+    const score = Number(item.roundScore) || Number(item.score) || 0;
+    html += '<div class="rank-item"><div class="rank-left"><div class="rank-name">'+escapeHtml(x(t('rankName'),{rank: idx+1, name: item.name || t('guest')}))+'</div><div class="rank-meta">'+escapeHtml(x(t('branchDept'),{branch:item.location || '-', department:item.department || '-'}))+' · '+escapeHtml(formatDate(item.createdAt))+'</div></div><div class="rank-score">'+score+'/'+getTotalPossibleMax()+'</div></div>';
   });
   els.scoreboardList.innerHTML=html;
 }
-
-function updateSidebar(){ const total=sessionQuestions.length || questionBank[currentLang].length; const visibleIndex=screens.quiz.classList.contains('hidden') ? 0 : currentIndex+1; els.sidebarQuestion.textContent = visibleIndex + ' / ' + total; els.sidebarSaved.textContent = countChecked(); els.currentProgressPill.textContent = x(t('savedProgress'), {saved: countChecked(), total}); if(els.roundStats) els.roundStats.textContent = x(t('roundStats'), {score: totalScore(), repeatCount: openRepeatCount()}); }
+function updateSidebar(){ const total=sessionQuestions.length || questionBank[currentLang].length; const visibleIndex=screens.quiz.classList.contains('hidden') ? 0 : currentIndex+1; els.sidebarQuestion.textContent = visibleIndex + ' / ' + total; els.sidebarSaved.textContent = countChecked(); els.currentProgressPill.textContent = x(t('savedProgress'), {saved: countChecked(), total}); if(els.roundStats) els.roundStats.textContent = x(t('roundStats'), {score: totalScore(), repeatCount: openRepeatCount(), round: CURRENT_ROUND, totalRounds: TOTAL_ROUNDS}); }
 function openWelcome(){ if(!validateParticipantFields()) return; showView('welcome'); }
 function startQuiz(){ initSession(); showView('quiz'); renderQuestion(); }
 function bindAnswerEvents(){ els.answersForm.querySelectorAll('input').forEach(input=> input.addEventListener('change', handleAnswerChange)); }
@@ -1212,29 +1202,86 @@ function renderQuestion(){
       index: currentIndex
     })
   );
- const item=sessionQuestions[currentIndex]; const state=questionStates[currentIndex]; let html=''; els.questionMeta.textContent = x(t('questionMeta'), {modeLabel: item.round==='repeat' ? t('repeatRound') : t('mainRound'), current: currentIndex+1, total: sessionQuestions.length}); els.questionTitle.textContent = item.question; els.questionNote.textContent = item.note + (item.round==='repeat' ? ' – ' + t('repeatTag') : ''); els.progressFill.style.width = (((currentIndex+1)/sessionQuestions.length)*100)+'%'; els.roundTitle.textContent = item.round==='repeat' ? t('roundRepeatDesc') : t('roundMainDesc'); item.options.forEach((opt,i)=> { const inputType=item.type==='multiple' ? 'checkbox' : 'radio'; const inputName=item.type==='multiple' ? ('check-'+currentIndex+'-'+i) : ('choice-'+currentIndex); const selected=item.type==='multiple' ? answers[currentIndex].includes(i) : answers[currentIndex]===i; let cls='answer'+(selected?' selected':''); if(state.checked){ if(item.correct.includes(i)) cls += ' correct-answer'; if(selected && !item.correct.includes(i)) cls += ' wrong-answer'; } html += '<div class="'+cls+'"><label><input '+(state.checked?'disabled ':'')+'type="'+inputType+'" name="'+inputName+'" value="'+i+'"'+(selected?' checked':'')+'><span>'+escapeHtml(opt)+'</span></label></div>'; }); els.answersForm.innerHTML=html; if(!state.checked) bindAnswerEvents(); document.getElementById('prevBtn').disabled=currentIndex===0; document.getElementById('checkBtn').classList.toggle('hidden', state.checked); document.getElementById('nextBtn').classList.toggle('hidden', !state.checked || currentIndex===sessionQuestions.length-1); document.getElementById('finishBtn').classList.toggle('hidden', !state.checked || currentIndex!==sessionQuestions.length-1); renderFeedback(); updateSidebar(); }
+ const item=sessionQuestions[currentIndex]; const state=questionStates[currentIndex]; let html=''; els.questionMeta.textContent = x(t('questionMeta'), {modeLabel: item.round==='repeat' ? t('repeatRound') : t('mainRound'), current: currentIndex+1, total: sessionQuestions.length}); els.questionTitle.textContent = item.question; els.questionNote.textContent = item.note + (item.round==='repeat' ? ' � ' + t('repeatTag') : ''); els.progressFill.style.width = (((currentIndex+1)/sessionQuestions.length)*100)+'%'; els.roundTitle.textContent = item.round==='repeat' ? t('roundRepeatDesc') : t('roundMainDesc'); item.options.forEach((opt,i)=> { const inputType=item.type==='multiple' ? 'checkbox' : 'radio'; const inputName=item.type==='multiple' ? ('check-'+currentIndex+'-'+i) : ('choice-'+currentIndex); const selected=item.type==='multiple' ? answers[currentIndex].includes(i) : answers[currentIndex]===i; let cls='answer'+(selected?' selected':''); if(state.checked){ if(item.correct.includes(i)) cls += ' correct-answer'; if(selected && !item.correct.includes(i)) cls += ' wrong-answer'; } html += '<div class="'+cls+'"><label><input '+(state.checked?'disabled ':'')+'type="'+inputType+'" name="'+inputName+'" value="'+i+'"'+(selected?' checked':'')+'><span>'+escapeHtml(opt)+'</span></label></div>'; }); els.answersForm.innerHTML=html; if(!state.checked) bindAnswerEvents(); document.getElementById('prevBtn').disabled=currentIndex===0; document.getElementById('checkBtn').classList.toggle('hidden', state.checked); document.getElementById('nextBtn').classList.toggle('hidden', !state.checked || currentIndex===sessionQuestions.length-1); document.getElementById('finishBtn').classList.toggle('hidden', !state.checked || currentIndex!==sessionQuestions.length-1); renderFeedback(); updateSidebar(); }
 function renderFeedback(){ const item=sessionQuestions[currentIndex], state=questionStates[currentIndex]; if(!state.checked){ els.feedbackCard.className='feedback-card hidden'; els.feedbackCard.innerHTML=''; return; } const userAnswer=item.type==='multiple' ? answers[currentIndex] : [answers[currentIndex]]; const selectedTexts=[], correctTexts=[]; userAnswer.forEach(idx=> { if(typeof idx==='number' && typeof item.options[idx] !== 'undefined') selectedTexts.push(escapeHtml(item.options[idx])); }); item.correct.forEach(idx=> correctTexts.push(escapeHtml(item.options[idx]))); els.feedbackCard.className='feedback-card '+(state.isCorrect ? 'correct' : 'incorrect'); els.feedbackCard.innerHTML='<div class="feedback-title">'+escapeHtml(state.isCorrect ? t('feedbackCorrectTitle') : t('feedbackIncorrectTitle'))+'</div>'+'<div>'+escapeHtml(state.isCorrect ? t('feedbackCorrectText') : t('feedbackIncorrectText'))+'</div>'+'<div class="feedback-points">'+escapeHtml(state.points===25 ? t('pointsFirstCorrect') : state.points===10 ? t('pointsRepeatCorrect') : t('pointsWrong'))+'</div>'+'<div><strong>'+escapeHtml(t('yourAnswer'))+'</strong> '+(selectedTexts.length ? selectedTexts.join(', ') : escapeHtml(t('noAnswerSelected')))+'</div>'+'<div><strong>'+escapeHtml(item.correct.length>1 ? t('correctAnswers') : t('correctAnswer'))+'</strong> '+correctTexts.join(', ')+'</div>'+'<div>'+escapeHtml(item.explanation)+'</div>'; }
 function checkAnswer(){ const item=sessionQuestions[currentIndex], state=questionStates[currentIndex]; if(state.checked) return; if(!isAnswered(currentIndex)){ alert(t('noAnswerSelected')); return; } const userAnswer=item.type==='multiple' ? answers[currentIndex] : [answers[currentIndex]]; state.checked=true; state.isCorrect=arraysEqual(userAnswer, item.correct); if(state.isCorrect){ state.points=item.round==='repeat' ? 10 : 25; } else { state.points=0; if(item.round!=='repeat' && !repeatQueue.includes(item.baseIndex)) repeatQueue.push(item.baseIndex); } renderQuestion(); }
 function prevQuestion(){ if(currentIndex>0){ currentIndex -= 1; renderQuestion(); } }
 function startRepeatRound(){ const original=questionBank[currentLang]; repeatQueue.forEach(baseIdx=> { const item=original[baseIdx]; sessionQuestions.push({...item, baseIndex: baseIdx, round:'repeat'}); answers.push(item.type==='multiple' ? [] : null); questionStates.push({checked:false,isCorrect:false,points:0}); }); inRepeatRound=true; currentIndex=questionBank[currentLang].length; renderQuestion(); }
 function goForward(){ if(currentIndex<sessionQuestions.length-1){ currentIndex += 1; renderQuestion(); return; } if(!inRepeatRound && repeatQueue.length){ startRepeatRound(); return; } finishQuiz(); }
-function buildReview(){ let html=''; sessionQuestions.forEach((item,idx)=> { const state=questionStates[idx]; const userAnswer=item.type==='multiple' ? answers[idx] : [answers[idx]]; const selectedTexts=[], correctTexts=[]; let badgeClass='status-incorrect', badgeText=t('statusIncorrect'); if(state.isCorrect && item.round==='main'){ badgeClass='status-correct'; badgeText=t('statusCorrect'); } if(state.isCorrect && item.round==='repeat'){ badgeClass='status-repeat-correct'; badgeText=t('statusRepeatCorrect'); } userAnswer.forEach(ans=> { if(typeof ans==='number' && typeof item.options[ans] !== 'undefined') selectedTexts.push(escapeHtml(item.options[ans])); }); item.correct.forEach(ans=> correctTexts.push(escapeHtml(item.options[ans]))); html += '<div class="review-card"><span class="status-badge '+badgeClass+'">'+escapeHtml(badgeText)+' – '+state.points+'</span><h3>'+(idx+1)+'. '+escapeHtml(item.question)+(item.round==='repeat' ? ' ('+escapeHtml(t('repeatTag'))+')' : '')+'</h3><div class="review-text"><strong>'+escapeHtml(t('yourAnswer'))+'</strong> '+(selectedTexts.length ? selectedTexts.join(', ') : escapeHtml(t('noAnswerSelected')))+'</div><div class="review-text"><strong>'+escapeHtml(item.correct.length>1 ? t('correctAnswers') : t('correctAnswer'))+'</strong> '+correctTexts.join(', ')+'</div><div class="review-text">'+escapeHtml(item.explanation)+'</div></div>'; }); els.reviewList.innerHTML=html; }
+function buildReview(){ let html=''; sessionQuestions.forEach((item,idx)=> { const state=questionStates[idx]; const userAnswer=item.type==='multiple' ? answers[idx] : [answers[idx]]; const selectedTexts=[], correctTexts=[]; let badgeClass='status-incorrect', badgeText=t('statusIncorrect'); if(state.isCorrect && item.round==='main'){ badgeClass='status-correct'; badgeText=t('statusCorrect'); } if(state.isCorrect && item.round==='repeat'){ badgeClass='status-repeat-correct'; badgeText=t('statusRepeatCorrect'); } userAnswer.forEach(ans=> { if(typeof ans==='number' && typeof item.options[ans] !== 'undefined') selectedTexts.push(escapeHtml(item.options[ans])); }); item.correct.forEach(ans=> correctTexts.push(escapeHtml(item.options[ans]))); html += '<div class="review-card"><span class="status-badge '+badgeClass+'">'+escapeHtml(badgeText)+' � '+state.points+'</span><h3>'+(idx+1)+'. '+escapeHtml(item.question)+(item.round==='repeat' ? ' ('+escapeHtml(t('repeatTag'))+')' : '')+'</h3><div class="review-text"><strong>'+escapeHtml(t('yourAnswer'))+'</strong> '+(selectedTexts.length ? selectedTexts.join(', ') : escapeHtml(t('noAnswerSelected')))+'</div><div class="review-text"><strong>'+escapeHtml(item.correct.length>1 ? t('correctAnswers') : t('correctAnswer'))+'</strong> '+correctTexts.join(', ')+'</div><div class="review-text">'+escapeHtml(item.explanation)+'</div></div>'; }); els.reviewList.innerHTML=html; }
 function renderResultOnly(){ const score=totalScore(), max=getTotalPossibleMax(), firstTryCorrect=questionStates.slice(0, questionBank[currentLang].length).filter(s=> s.checked && s.isCorrect).length; const achievedPct=Math.round((score/max)*100), notAchievedPct=100-achievedPct; els.finalBadge.textContent = x(t('finalBadge'), {score,max}); els.finalScoreValue.textContent = score; els.finalCorrectValue.textContent = firstTryCorrect; els.correctBar.style.width = achievedPct + '%'; els.incorrectBar.style.width = notAchievedPct + '%'; els.correctBarLabel.textContent = achievedPct + '%'; els.incorrectBarLabel.textContent = notAchievedPct + '%'; if(score>=250){ els.resultTitle.textContent=x(t('resultExcellentTitle'),{name:playerName}); els.resultText.textContent=t('resultExcellentText'); } else if(score>=150){ els.resultTitle.textContent=x(t('resultGoodTitle'),{name:playerName}); els.resultText.textContent=t('resultGoodText'); } else { els.resultTitle.textContent=x(t('resultThanksTitle'),{name:playerName}); els.resultText.textContent=t('resultThanksText'); } updateParticipantInfo(); buildReview(); }
-function finishQuiz(){ const score=totalScore(); const maxScore=getTotalPossibleMax(); const percentage=Math.round((score/maxScore)*100); const createdAt=new Date().toISOString(); const resultEntry={name: playerName, country: playerCountry, location: playerLocation, department: playerDepartment, score, maxScore, percentage, language: currentLang, createdAt}; const board=loadBoard(); renderResultOnly(); board.push(resultEntry); board.sort((a,b)=> (b.score||0)-(a.score||0) || new Date(b.createdAt)-new Date(a.createdAt)); saveBoard(board.slice(0,1000)); renderBoard(); sendScoreToPowerAutomate(resultEntry); showView('result'); }
+function buildAnswerSummary(){
+  const questionResults = {};
+  sessionQuestions.forEach((item, idx)=> {
+    const state = questionStates[idx] || {};
+    const baseQuestionNumber = Number(item.baseIndex) + 1;
+    const isCorrect = Boolean(state.isCorrect);
+    const points = Number(state.points) || 0;
+    if(!questionResults[baseQuestionNumber]){
+      questionResults[baseQuestionNumber] = { main: null, repeat: null, mainPoints: 0, repeatPoints: 0 };
+    }
+    if(item.round === 'repeat'){
+      questionResults[baseQuestionNumber].repeat = isCorrect;
+      questionResults[baseQuestionNumber].repeatPoints = points;
+    } else {
+      questionResults[baseQuestionNumber].main = isCorrect;
+      questionResults[baseQuestionNumber].mainPoints = points;
+    }
+  });
+  return Object.keys(questionResults)
+    .sort((a,b)=> Number(a) - Number(b))
+    .map(questionNumber => {
+      const result = questionResults[questionNumber];
+      if(result.main === true) return 'Question ' + questionNumber + ': Correct (' + result.mainPoints + ' points)';
+      if(result.main === false && result.repeat === true) return 'Question ' + questionNumber + ': Wrong → Repeatround correct (' + result.repeatPoints + ' points)';
+      if(result.main === false && result.repeat === false) return 'Question ' + questionNumber + ': Wrong → Repeatround wrong (0 points)';
+      if(result.main === false && result.repeat === null) return 'Question ' + questionNumber + ': Wrong (0 points)';
+      return 'Question ' + questionNumber + ': Unknown';
+    })
+    .join(', ');
+}
+function finishQuiz(){
+  const roundScore = totalScore();
+  const score = roundScore;
+  const maxScore = getTotalPossibleMax();
+  const percentage = Math.round((roundScore/maxScore)*100);
+  const createdAt = new Date().toISOString();
+  const resultEntry = {
+    name: playerName,
+    country: playerCountry,
+    location: playerLocation,
+    department: playerDepartment,
+    round: CURRENT_ROUND,
+    roundScore: roundScore,
+    score: score,
+    maxScore: maxScore,
+    percentage: percentage,
+    language: currentLang,
+    createdAt: createdAt,
+    answerSummary: buildAnswerSummary()
+  };
+  const board=loadBoard();
+  renderResultOnly();
+  board.push(resultEntry);
+  board.sort(compareLeaderboardEntries);
+  saveBoard(board.slice(0,1000));
+  renderBoard();
+  sendScoreToPowerAutomate(resultEntry);
+  showView('result');
+}
 function resetApp(){ showView('start'); els.playerNameInput.value=playerName; els.playerCountryInput.value=playerCountry; populateLocationDropdown(playerCountry, playerLocation); els.playerLocationInput.value=playerLocation; els.playerDepartmentInput.value=playerDepartment; initSession(); updateParticipantInfo(); updateSidebar(); }
 function getParticipantRoundKey(item){
-  const row = normalizeLeaderboardItem(item);
   return [
-    (row.name || t('guest')).trim().toLowerCase(),
-    (row.department || '').trim().toLowerCase(),
-    (row.location || '').trim().toLowerCase(),
-    Number(row.round) || 1
+    (item.name || t('guest')).trim().toLowerCase(),
+    (item.department || '').trim().toLowerCase(),
+    (item.location || '').trim().toLowerCase(),
+    Number(item.round) || 1
   ].join('|');
 }
 function getFirstAttemptPerPersonPerRound(rows){
   const attemptMap = {};
   rows
-    .map(item => normalizeLeaderboardItem(item))
+    .slice()
     .sort((a,b)=> getCompletionTimestamp(a.createdAt) - getCompletionTimestamp(b.createdAt))
     .forEach(item => {
       const key = getParticipantRoundKey(item);
@@ -1243,15 +1290,14 @@ function getFirstAttemptPerPersonPerRound(rows){
   return Object.values(attemptMap);
 }
 function getParticipantKey(item){
-  const row = normalizeLeaderboardItem(item);
   return [
-    (row.name || t('guest')).trim().toLowerCase(),
-    (row.department || '').trim().toLowerCase(),
-    (row.location || '').trim().toLowerCase()
+    (item.name || t('guest')).trim().toLowerCase(),
+    (item.department || '').trim().toLowerCase(),
+    (item.location || '').trim().toLowerCase()
   ].join('|');
 }
 function getLeaderboardInputRows(){
-  const raw = loadBoard().map(item => normalizeLeaderboardItem(item));
+  const raw = loadBoard();
   const filteredRows = currentLeaderboardScope === 'currentRound'
     ? raw.filter(item => Number(item.round) === CURRENT_ROUND)
     : raw;
@@ -1260,20 +1306,21 @@ function getLeaderboardInputRows(){
 function getLeaderboardData(){
   const raw = getLeaderboardInputRows();
   const peopleMap = {}, deptMap = {}, locMap = {};
+
   raw.forEach(item => {
-    const row = normalizeLeaderboardItem(item);
-    const roundScore = Number(row.roundScore) || Number(row.score) || 0;
-    const round = Number(row.round) || 1;
-    const personKey = getParticipantKey(row);
+    const roundScore = Number(item.roundScore) || Number(item.score) || 0;
+    const round = Number(item.round) || 1;
+    const personKey = getParticipantKey(item);
+
     if(!peopleMap[personKey]){
       peopleMap[personKey] = {
-        name: row.name || t('guest'),
-        department: row.department || '-',
-        location: row.location || '-',
+        name: item.name || t('guest'),
+        department: item.department || '-',
+        location: item.location || '-',
         attempts: 0,
         bestRoundScore: 0,
         totalScore: 0,
-        lastPlayed: row.createdAt || '',
+        lastPlayed: item.createdAt || '',
         roundsPlayedSet: {}
       };
     }
@@ -1282,24 +1329,25 @@ function getLeaderboardData(){
     p.bestRoundScore = Math.max(p.bestRoundScore, roundScore);
     p.totalScore += roundScore;
     p.roundsPlayedSet[round] = true;
-    if(!p.lastPlayed || getCompletionTimestamp(row.createdAt) > getCompletionTimestamp(p.lastPlayed)) p.lastPlayed = row.createdAt;
+    if(!p.lastPlayed || getCompletionTimestamp(item.createdAt) > getCompletionTimestamp(p.lastPlayed)) p.lastPlayed = item.createdAt;
 
-    const depKey = (row.department || '-').trim().toLowerCase();
-    if(!deptMap[depKey]) deptMap[depKey] = {department:row.department || '-', participantsSet:{}, attempts:0, totalScore:0, bestRoundScore:0};
+    const depKey = (item.department || '-').trim().toLowerCase();
+    if(!deptMap[depKey]) deptMap[depKey] = {department:item.department || '-', participantsSet:{}, attempts:0, totalScore:0, bestRoundScore:0};
     const d = deptMap[depKey];
     d.attempts += 1;
     d.totalScore += roundScore;
     d.bestRoundScore = Math.max(d.bestRoundScore, roundScore);
-    d.participantsSet[(row.name || t('guest')).trim().toLowerCase()] = true;
+    d.participantsSet[(item.name || t('guest')).trim().toLowerCase()] = true;
 
-    const locKey = (row.location || '-').trim().toLowerCase();
-    if(!locMap[locKey]) locMap[locKey] = {location:row.location || '-', participantsSet:{}, attempts:0, totalScore:0, bestRoundScore:0};
+    const locKey = (item.location || '-').trim().toLowerCase();
+    if(!locMap[locKey]) locMap[locKey] = {location:item.location || '-', participantsSet:{}, attempts:0, totalScore:0, bestRoundScore:0};
     const l = locMap[locKey];
     l.attempts += 1;
     l.totalScore += roundScore;
     l.bestRoundScore = Math.max(l.bestRoundScore, roundScore);
-    l.participantsSet[(row.name || t('guest')).trim().toLowerCase()] = true;
+    l.participantsSet[(item.name || t('guest')).trim().toLowerCase()] = true;
   });
+
   const people = Object.values(peopleMap)
     .map(item => ({...item, roundsPlayed:Object.keys(item.roundsPlayedSet).length}))
     .sort((a,b)=> {
@@ -1328,13 +1376,19 @@ function renderLeaderboard(){
       '<th>'+escapeHtml(t('tableName'))+'</th>'+
       '<th>'+escapeHtml(t('tableDepartment'))+'</th>'+
       '<th>'+escapeHtml(t('tableLocation'))+'</th>';
-    if(currentLeaderboardScope === 'currentRound') html += '<th>'+escapeHtml(t('tableRound'))+'</th><th>'+escapeHtml(t('tableRoundScore'))+'</th>';
-    else html += '<th>'+escapeHtml(t('tableTotalScore'))+'</th><th>'+escapeHtml(t('tableRoundsPlayed'))+'</th>';
+    if(currentLeaderboardScope === 'currentRound'){
+      html += '<th>'+escapeHtml(t('tableRound'))+'</th><th>'+escapeHtml(t('tableRoundScore'))+'</th>';
+    } else {
+      html += '<th>'+escapeHtml(t('tableTotalScore'))+'</th><th>'+escapeHtml(t('tableRoundsPlayed'))+'</th>';
+    }
     html += '<th>'+escapeHtml(t('tableAttempts'))+'</th><th>'+escapeHtml(t('tableLastPlayed'))+'</th></tr></thead><tbody>';
     data.people.forEach((item,idx)=> {
       html += '<tr><td><span class="badge-rank">'+(idx+1)+'</span></td><td>'+escapeHtml(item.name)+'</td><td>'+escapeHtml(item.department)+'</td><td>'+escapeHtml(item.location)+'</td>';
-      if(currentLeaderboardScope === 'currentRound') html += '<td>'+CURRENT_ROUND+'</td><td>'+item.bestRoundScore+'/'+getTotalPossibleMax()+'</td>';
-      else html += '<td>'+item.totalScore+'/'+(getTotalPossibleMax()*TOTAL_ROUNDS)+'</td><td>'+item.roundsPlayed+'/'+TOTAL_ROUNDS+'</td>';
+      if(currentLeaderboardScope === 'currentRound'){
+        html += '<td>'+CURRENT_ROUND+'</td><td>'+item.bestRoundScore+'/'+getTotalPossibleMax()+'</td>';
+      } else {
+        html += '<td>'+item.totalScore+'/'+(getTotalPossibleMax()*TOTAL_ROUNDS)+'</td><td>'+item.roundsPlayed+'/'+TOTAL_ROUNDS+'</td>';
+      }
       html += '<td>'+item.attempts+'</td><td>'+escapeHtml(formatDate(item.lastPlayed))+'</td></tr>';
     });
     html += '</tbody></table>';
@@ -1368,13 +1422,10 @@ function renderLeaderboard(){
 }
 function updateLeaderboardButtons(){
   document.querySelectorAll('#tabPeople, #tabDepartments, #tabLocations').forEach(btn => btn.classList.remove('active'));
-  const mainTab = document.getElementById(currentLeaderboardTab==='people' ? 'tabPeople' : currentLeaderboardTab==='departments' ? 'tabDepartments' : 'tabLocations');
-  if(mainTab) mainTab.classList.add('active');
+  document.getElementById(currentLeaderboardTab==='people' ? 'tabPeople' : currentLeaderboardTab==='departments' ? 'tabDepartments' : 'tabLocations').classList.add('active');
   document.querySelectorAll('#tabCurrentRound, #tabYearTotal').forEach(btn => btn.classList.remove('active'));
-  const scopeTab = document.getElementById(currentLeaderboardScope==='currentRound' ? 'tabCurrentRound' : 'tabYearTotal');
-  if(scopeTab) scopeTab.classList.add('active');
+  document.getElementById(currentLeaderboardScope==='currentRound' ? 'tabCurrentRound' : 'tabYearTotal').classList.add('active');
 }
-
 function goHome(){
   localStorage.removeItem(DEBUG_SCREEN_KEY);
   currentIndex = 0;
@@ -1382,7 +1433,14 @@ function goHome(){
 }
 async function openLeaderboard(){ previousViewBeforeLeaderboard=currentView; showView('leaderboard'); await refreshSharePointLeaderboard(); }
 function closeLeaderboard(){ showView(previousViewBeforeLeaderboard || 'start'); }
-function exportCsv(){ const raw=loadBoard(); const csv=[['name','location','department','score','maxPoints','createdAt']].concat(raw.map(item=> [item.name||'', item.location||'', item.department||'', item.score||0, getTotalPossibleMax(), item.createdAt||''])).map(row=> row.map(cell=> '"'+String(cell).replace(/"/g,'""')+'"').join(',')).join('\n'); downloadTextFile('stockmeier_quiz_results.csv', csv, 'text/csv;charset=utf-8;'); }
+function exportCsv(){
+  const raw=loadBoard();
+  const csv=[['name','country','location','department','round','roundScore','score','maxPoints','percentage','language','createdAt','answerSummary']]
+    .concat(raw.map(item=> [item.name||'', item.country||'', item.location||'', item.department||'', item.round||'', item.roundScore||item.score||0, item.score||item.roundScore||0, item.maxScore||getTotalPossibleMax(), item.percentage||'', item.language||'', item.createdAt||'', item.answerSummary||'']))
+    .map(row=> row.map(cell=> '"'+String(cell).replace(/"/g,'""')+'"').join(','))
+    .join('\n');
+  downloadTextFile('stockmeier_quiz_results_rounds.csv', csv, 'text/csv;charset=utf-8;');
+}
 function exportJson(){ downloadTextFile('stockmeier_quiz_results.json', JSON.stringify(loadBoard(), null, 2), 'application/json;charset=utf-8;'); }
 
 // events
