@@ -1241,18 +1241,18 @@ function buildAnswerSummary(){
     .map(questionNumber => {
       const result = questionResults[questionNumber];
       if(result.main === true){
-        return 'Vraag ' + questionNumber + ': goed (' + result.mainPoints + ' punten)';
+        return 'Question ' + questionNumber + ': Correct (' + result.mainPoints + ' points)';
       }
       if(result.main === false && result.repeat === true){
-        return 'Vraag ' + questionNumber + ': fout → herhaalronde goed (' + result.repeatPoints + ' punten)';
+        return 'Question ' + questionNumber + ': Wrong → repeatround correct (' + result.repeatPoints + ' points)';
       }
       if(result.main === false && result.repeat === false){
-        return 'Vraag ' + questionNumber + ': fout → herhaalronde fout (0 punten)';
+        return 'Question ' + questionNumber + ': Wrong → repeatround wrong (0 points)';
       }
       if(result.main === false && result.repeat === null){
-        return 'Vraag ' + questionNumber + ': fout (0 punten)';
+        return 'Question ' + questionNumber + ': wrong (0 points)';
       }
-      return 'Vraag ' + questionNumber + ': onbekend';
+      return 'Question ' + questionNumber + ': unknown';
     })
     .join(', ');
 }
