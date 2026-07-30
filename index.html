@@ -1244,15 +1244,15 @@ function buildAnswerSummary(){
         return 'Question ' + questionNumber + ': Correct (' + result.mainPoints + ' points)';
       }
       if(result.main === false && result.repeat === true){
-        return 'Question ' + questionNumber + ': Wrong → repeatround correct (' + result.repeatPoints + ' points)';
+        return 'Question ' + questionNumber + ': Wrong → Repeatround correct (' + result.repeatPoints + ' points)';
       }
       if(result.main === false && result.repeat === false){
-        return 'Question ' + questionNumber + ': Wrong → repeatround wrong (0 points)';
+        return 'Question ' + questionNumber + ': Wrong → Repeatround wrong (0 points)';
       }
       if(result.main === false && result.repeat === null){
-        return 'Question ' + questionNumber + ': wrong (0 points)';
+        return 'Question ' + questionNumber + ': Wrong (0 points)';
       }
-      return 'Question ' + questionNumber + ': unknown';
+      return 'Question ' + questionNumber + ': Unknown';
     })
     .join(', ');
 }
@@ -1289,7 +1289,44 @@ document.getElementById('restartBtn').addEventListener('click', resetApp);
 document.getElementById('tabPeople').addEventListener('click', ()=> { currentLeaderboardTab='people'; renderLeaderboard(); });
 document.getElementById('tabDepartments').addEventListener('click', ()=> { currentLeaderboardTab='departments'; renderLeaderboard(); });
 document.getElementById('tabLocations').addEventListener('click', ()=> { currentLeaderboardTab='locations'; renderLeaderboard(); });
-document.querySelectorAll('.lang-btn').forEach(button=> button.addEventListener('click', ()=> { currentLang=button.dataset.lang; const wasLeaderboard=currentView==='leaderboard'; const wasQuiz=currentView==='quiz'; const keepParticipant = currentView==='start' || currentView==='welcome' || currentView==='leaderboard' || currentView==='result'; if(wasQuiz){ repeatQueue=[]; inRepeatRound=false; currentIndex=0; questionStates=[]; const oldName=playerName, oldCountry=playerCountry, oldLoc=playerLocation, oldDep=playerDepartment; playerName=oldName; playerCountry=oldCountry; playerLocation=oldLoc; playerDepartment=oldDep; initSession(); showView('start'); } applyLanguage(); }));
+document.querySelectorAll('.lang-btn').forEach(button=> button.addEventListener('click', ()=> {
+  const newLang = button.dataset.lang;
+  if(newLang === currentLang) return;
+
+  const wasQuiz = currentView === 'quiz';
+  const wasLeaderboard = currentView === 'leaderboard';
+  const wasResult = currentView === 'result';
+  const savedIndex = currentIndex;
+
+  currentLang = newLang;
+
+  if(wasQuiz){
+    // Behoud voortgang bij taalwissel tijdens de quiz.
+    // De vragen worden opnieuw opgehaald uit dezelfde basisvraag-index, maar antwoorden en scores blijven staan.
+    sessionQuestions = sessionQuestions.map(item => {
+      const translatedQuestion = questionBank[currentLang][item.baseIndex] || item;
+      return {
+        ...translatedQuestion,
+        baseIndex: item.baseIndex,
+        round: item.round
+      };
+    });
+    currentIndex = Math.max(0, Math.min(savedIndex, sessionQuestions.length - 1));
+  }
+
+  applyLanguage();
+
+  if(wasQuiz){
+    showView('quiz');
+    renderQuestion();
+  } else if(wasLeaderboard){
+    showView('leaderboard');
+    renderLeaderboard();
+  } else if(wasResult){
+    showView('result');
+    renderResultOnly();
+  }
+}));
 (async function initialiseQuizApplication() {
   await loadQuestionBank();
 
