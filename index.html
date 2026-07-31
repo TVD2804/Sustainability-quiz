@@ -854,18 +854,71 @@ const ui = {
 
 // =======================================================
 // RONDE-INSTELLINGEN
-// Pas CURRENT_ROUND aan wanneer een nieuwe ronde start.
+// De huidige ronde wordt opgehaald uit QuizSettings.xlsx.
+// Pas dus niet meer handmatig CURRENT_ROUND aan in deze HTML.
 // De Excelbestanden moeten exact heten:
 // Questions - Round 1.xlsx t/m Questions - Round 12.xlsx
+// Het instellingenbestand moet exact heten:
+// QuizSettings.xlsx
 // =======================================================
 const TOTAL_ROUNDS = 12;
-const CURRENT_ROUND = 1;
-const QUESTION_FILE = `Questions - Round ${CURRENT_ROUND}.xlsx`;
+const SETTINGS_FILE = 'QuizSettings.xlsx';
+let CURRENT_ROUND = 1;
+let QUESTION_FILE = `Questions - Round ${CURRENT_ROUND}.xlsx`;
 
 const STORAGE_KEY = 'stockmeier-sustainability-quiz-stockmeier-v5-rounds';
 const DEBUG_SCREEN_KEY = 'stockmeier-debug-screen';
 const POWER_AUTOMATE_SUBMIT_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/820e1b8ec3a145d880b8d9be364868d8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sniqu72aomTrPaggFwYYEu6sOIhqagODz7xVk6ZmzG0';
 const POWER_AUTOMATE_LEADERBOARD_URL = 'https://defaulta4b546f6bf0d4dd8a0fddf27d41681.92.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/18/workflows/d600c211d315409591048835a365579c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cnlKHu_ZAscmox62flKE1USvNMPJftk2H14k3-Aj1Y0';
+
+async function loadQuizSettings() {
+  const fallbackRound = 1;
+
+  function applyRound(roundNumber) {
+    const parsedRound = Number(roundNumber);
+    if (Number.isInteger(parsedRound) && parsedRound >= 1 && parsedRound <= TOTAL_ROUNDS) {
+      CURRENT_ROUND = parsedRound;
+    } else {
+      CURRENT_ROUND = fallbackRound;
+    }
+
+    QUESTION_FILE = `Questions - Round ${CURRENT_ROUND}.xlsx`;
+    updateHeroRoundBadge();
+  }
+
+  try {
+    const response = await fetch(SETTINGS_FILE + '?v=' + new Date().getTime());
+    if (!response.ok) {
+      throw new Error('Could not load ' + SETTINGS_FILE + '. HTTP status: ' + response.status);
+    }
+
+    const data = await response.arrayBuffer();
+    const workbook = XLSX.read(data, { type: 'array' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    if (!worksheet) {
+      throw new Error('No worksheet found in ' + SETTINGS_FILE);
+    }
+
+    const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+    let roundValue = '';
+
+    rows.forEach(row => {
+      const setting = String(row.Setting || row.setting || row.Name || row.name || '').trim().toLowerCase();
+      if (setting === 'currentround' || setting === 'current round' || setting === 'huidigeronde' || setting === 'huidige ronde') {
+        roundValue = row.Value || row.value || row.CurrentRound || row.currentRound || '';
+      }
+      if (row.CurrentRound || row.currentRound) {
+        roundValue = row.CurrentRound || row.currentRound;
+      }
+    });
+
+    applyRound(roundValue);
+    console.log('Current round loaded from ' + SETTINGS_FILE + ':', CURRENT_ROUND);
+  } catch (error) {
+    console.error('Could not load current round from ' + SETTINGS_FILE + '. Falling back to round ' + fallbackRound + '.', error);
+    applyRound(fallbackRound);
+  }
+}
 
 async function sendScoreToPowerAutomate(entry) {
   if (!POWER_AUTOMATE_SUBMIT_URL) return;
@@ -1480,6 +1533,7 @@ document.getElementById('tabCurrentRound').addEventListener('click', ()=> { curr
 document.getElementById('tabYearTotal').addEventListener('click', ()=> { currentLeaderboardScope='yearTotal'; renderLeaderboard(); });
 document.querySelectorAll('.lang-btn').forEach(button=> button.addEventListener('click', ()=> { currentLang=button.dataset.lang; const wasLeaderboard=currentView==='leaderboard'; const wasQuiz=currentView==='quiz'; const keepParticipant = currentView==='start' || currentView==='welcome' || currentView==='leaderboard' || currentView==='result'; if(wasQuiz){ repeatQueue=[]; inRepeatRound=false; currentIndex=0; questionStates=[]; const oldName=playerName, oldCountry=playerCountry, oldLoc=playerLocation, oldDep=playerDepartment; playerName=oldName; playerCountry=oldCountry; playerLocation=oldLoc; playerDepartment=oldDep; initSession(); showView('start'); } applyLanguage(); }));
 (async function initialiseQuizApplication() {
+  await loadQuizSettings();
   await loadQuestionBank();
 
   initDropdowns();
